@@ -36,6 +36,9 @@ class GameMap():
 
         self.background = pygame.color.Color(0, 0, 0)  # map background is black
 
+        # contains all the players that are on the map
+        self.players = []
+
     def draw(self, screen_surface):
         screen_surface.fill(self.background)
 
@@ -46,6 +49,56 @@ class Line():
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
+
+def point_on_line(x, y, line):
+    # check if a point is on a line
+    x1 = line.x1
+    x2 = line.x2
+    y1 = line.y1
+    y2 = line.y2
+
+    x_ok = False
+    y_ok = False
+
+    if x1 == x2:
+        if x == x1:
+            x_ok = True
+
+            if y1 > y2:
+                if y <= y1 and y >= y2:
+                    y_ok = True
+            elif y1 < y2:
+                if y >= y1 and y <= y2:
+                    y_ok = True
+            # they are equal
+            else:
+                if y == y1:
+                    y_ok = True
+
+        if x_ok and y_ok:
+            return True
+        else:
+            return False
+
+    if y1 == y2:
+        if y == y1:
+            y_ok = True
+
+            if x1 > x2:
+                if x <= x1 and x >= x2:
+                        x_ok = True
+                elif x1 < x2:
+                    if x >= x1 and x <= x2:
+                        x_ok = True
+                # they are equal
+                else:
+                    if x == x1:
+                        x_ok = True
+
+        if x_ok and y_ok:
+            return True
+        else:
+            return False
 
 
 class Player():
@@ -81,9 +134,27 @@ class Player():
 
         self.direction = new_direction
 
+        # start new line when changing direction
+        self.start_new_line()
+
     def start_new_line(self):
         new_line = Line(self.x, self.y, self.x, self.y)
         self.lines.insert(0, new_line)
+
+    def check_collision(self):
+        status_good = "moving"
+        status_crashed = "crashed"
+
+        all_lines = []
+        for p in self.game_map.players:
+            for line in p.lines:
+                all_lines.append(line)
+
+        all_lines.remove(self.lines[0])
+        for line in all_lines:
+            if point_on_line(self.x, self.y, line):
+                return status_crashed
+        return status_good
 
     def update(self):
         status_good = "moving"
@@ -99,20 +170,20 @@ class Player():
             current_line.x2 = self.x
             current_line.y2 = self.y
 
+        collision = self.check_collision()
+        if collision == "crashed":
+            print("crashed!!!")
+
         if self.direction == "up":
-            self.start_new_line()
             self.y -= 1
             return status_good
         elif self.direction == "down":
-            self.start_new_line()
             self.y += 1
             return status_good
         elif self.direction == "left":
-            self.start_new_line()
             self.x -= 1
             return status_good
         elif self.direction == "right":
-            self.start_new_line()
             self.x += 1
             return status_good
 
@@ -147,6 +218,9 @@ def main():
     p2 = Player(500, 350, red, game_map)
     p2.input_dict = p2_input
     players = [p1, p2]
+
+    game_map.players.append(p1)
+    game_map.players.append(p2)
 
     screen_surface = initialize(*map_size)
 
