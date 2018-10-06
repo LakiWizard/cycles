@@ -1,0 +1,14 @@
+
+To do:
+
+basic game:
+  - create classes for players and map
+  - implement drawing the map and players
+  - implement the basic loop, with input and output
+  - do the trailing lines, collision detection
+  - add the obstacles
+
+extra:
+  - add the top bar for counting the score
+  - implement the shrinking playing field
+  - add a nice main menu (?)
