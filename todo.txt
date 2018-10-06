@@ -6,6 +6,8 @@ basic game:
   - implement drawing the map and players
   - implement the basic loop, with input and output
   - do the trailing lines, collision detection
+      (how to store and update the lines in an iterable manner)
+      (how to efficiently check for collisions)
   - add the obstacles
 
 extra:
