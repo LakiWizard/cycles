@@ -40,6 +40,14 @@ class GameMap():
         screen_surface.fill(self.background)
 
 
+class Line():
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+
 class Player():
     def __init__(self, x, y, color, game_map):
         self.x = x
@@ -48,6 +56,9 @@ class Player():
 
         self.direction = "up"
         self.input_dict = None
+
+        # the first element will always be the current trail
+        self.lines = []
 
         # hold a reference to the map you are on
         self.game_map = game_map
@@ -70,6 +81,10 @@ class Player():
 
         self.direction = new_direction
 
+    def start_new_line(self):
+        new_line = Line(self.x, self.y, self.x, self.y)
+        self.lines.insert(0, new_line)
+
     def update(self):
         status_good = "moving"
         status_crashed = "crashed"
@@ -77,20 +92,33 @@ class Player():
         if self.x < 0 or self.x > self.game_map.width or self.y < 0 or self.y > self.game_map.height:
             return status_crashed
 
+        if len(self.lines) == 0:
+            self.start_new_line()
+        else:
+            current_line = self.lines[0]
+            current_line.x2 = self.x
+            current_line.y2 = self.y
+
         if self.direction == "up":
+            self.start_new_line()
             self.y -= 1
             return status_good
         elif self.direction == "down":
+            self.start_new_line()
             self.y += 1
             return status_good
         elif self.direction == "left":
+            self.start_new_line()
             self.x -= 1
             return status_good
         elif self.direction == "right":
+            self.start_new_line()
             self.x += 1
             return status_good
 
     def draw(self, screen_surface):
+        for line in self.lines:
+            pygame.draw.line(screen_surface, self.color, (line.x1, line.y1), (line.x2, line.y2))
         pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 10, 4)
 
 
