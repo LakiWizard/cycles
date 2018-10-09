@@ -1,5 +1,6 @@
 
 import pygame
+import random
 
 
 all_events = None
@@ -39,8 +40,39 @@ class GameMap():
         # contains all the players that are on the map
         self.players = []
 
+        # contains all the obstacles on the map
+        self.obstacles = []
+
+    def fill_with_obstacles(self, num):
+        # randomly put num obstacles on the map
+        for i in range(num):
+            x = random.randint(0, self.width)
+            y = random.randint(0, self.height)
+            w = 30
+            h = 15
+
+            o = Obstacle(x, y, w, h)
+            self.obstacles.append(o)
+
     def draw(self, screen_surface):
         screen_surface.fill(self.background)
+
+
+class Obstacle():
+    def __init__(self, x, y, w, h):
+        # mostly a glorified rectangle
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+        self.color = pygame.color.Color(204, 102, 0)
+
+        # to speed up drawing a bit
+        self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+
+    def draw(self, screen_surface):
+        screen_surface.fill(self.color, self.rect)
 
 
 class Line():
@@ -215,8 +247,12 @@ class Player():
 
 def draw_all(game_map, screen_surface):
     game_map.draw(screen_surface)
+
     for p in game_map.players:
         p.draw(screen_surface)
+
+    for o in game_map.obstacles:
+        o.draw(screen_surface)
 
     pygame.display.flip()
 
@@ -232,6 +268,8 @@ def start_level(map_size):
 
     game_map = GameMap(*map_size)
 
+    game_map.fill_with_obstacles(10)
+
     blue = pygame.color.Color(50, 50, 220)
     red = pygame.color.Color(220, 50, 50)
 
@@ -245,7 +283,6 @@ def start_level(map_size):
     game_map.players.append(p2)
 
     return game_map
-
 
 
 def main():
