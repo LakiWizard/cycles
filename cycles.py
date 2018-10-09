@@ -101,6 +101,21 @@ def point_on_line(x, y, line):
             return False
 
 
+def is_opposing_direction(d1, d2):
+    # check if two directions are opposing
+
+    if (d1, d2) == ("up", "down"):
+        return True
+    if (d1, d2) == ("down", "up"):
+        return True
+    if (d1, d2) == ("left", "right"):
+        return True
+    if (d1, d2) == ("right", "left"):
+        return True
+
+    return False
+
+
 class Player():
     def __init__(self, x, y, color, game_map):
         self.x = x
@@ -131,6 +146,10 @@ class Player():
 
         reversed_dict = {value: key for key, value in self.input_dict.items()}
         new_direction = reversed_dict[user_input]
+
+        # you cant go in reverse
+        if is_opposing_direction(new_direction, self.direction):
+            return None
 
         self.direction = new_direction
 
