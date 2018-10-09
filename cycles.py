@@ -213,19 +213,22 @@ class Player():
 
 
 
-def draw_all(game_map, player_list, screen_surface):
+def draw_all(game_map, screen_surface):
     game_map.draw(screen_surface)
-    for p in player_list:
+    for p in game_map.players:
         p.draw(screen_surface)
 
     pygame.display.flip()
 
 
+def start_level(map_size):
+    """
+    map_size -> tuple(w, h)
+    """
+    global p1_input, p2_input
 
-def main():
-    global all_events
-
-    map_size = (800, 600)
+    # start a game level, do all the needed preparations
+    # return a GameMap object
 
     game_map = GameMap(*map_size)
 
@@ -240,6 +243,20 @@ def main():
 
     game_map.players.append(p1)
     game_map.players.append(p2)
+
+    return game_map
+
+
+
+def main():
+    global all_events
+
+    map_size = (800, 600)
+
+    game_map = start_level(map_size)
+    # for now we can assume there are only 2 players
+    p1 = game_map.players[0]
+    p2 = game_map.players[1]
 
     screen_surface = initialize(*map_size)
 
@@ -258,7 +275,7 @@ def main():
         p1.update()
         p2.update()
 
-        draw_all(game_map, players, screen_surface)
+        draw_all(game_map, screen_surface)
         clock.tick(60)
 
     deinitialize()
