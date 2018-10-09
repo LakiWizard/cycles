@@ -87,13 +87,13 @@ def point_on_line(x, y, line):
             if x1 > x2:
                 if x <= x1 and x >= x2:
                         x_ok = True
-                elif x1 < x2:
-                    if x >= x1 and x <= x2:
-                        x_ok = True
-                # they are equal
-                else:
-                    if x == x1:
-                        x_ok = True
+            elif x1 < x2:
+                if x >= x1 and x <= x2:
+                    x_ok = True
+            # they are equal
+            else:
+                if x == x1:
+                    x_ok = True
 
         if x_ok and y_ok:
             return True
