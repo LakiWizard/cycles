@@ -31,11 +31,16 @@ p2_input = {"left": pygame.K_LEFT,
 
 
 class GameMap():
-    def __init__(self, w, h):
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
         self.width = w
         self.height = h
 
         self.background = pygame.color.Color(0, 0, 0)  # map background is black
+
+        # the rect, for drawing
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         # contains all the players that are on the map
         self.players = []
@@ -46,8 +51,8 @@ class GameMap():
     def fill_with_obstacles(self, num):
         # randomly put num obstacles on the map
         for i in range(num):
-            x = random.randint(0, self.width)
-            y = random.randint(0, self.height)
+            x = random.randint(self.x, self.width)
+            y = random.randint(self.y, self.height)
             w = 30
             h = 15
 
@@ -55,7 +60,7 @@ class GameMap():
             self.obstacles.append(o)
 
     def draw(self, screen_surface):
-        screen_surface.fill(self.background)
+        screen_surface.fill(self.background, self.rect)
 
 
 class Obstacle():
@@ -240,7 +245,11 @@ class Player():
         status_good = "moving"
         status_crashed = "crashed"
 
-        if self.x < 0 or self.x > self.game_map.width or self.y < 0 or self.y > self.game_map.height:
+        map_x = self.game_map.x
+        map_y = self.game_map.y
+        map_w = self.game_map.width
+        map_h = self.game_map.height
+        if self.x < map_x or self.x > map_x+map_w or self.y < map_y or self.y > map_y+map_h:
             return status_crashed
 
         if len(self.lines) == 0:
@@ -252,7 +261,7 @@ class Player():
 
         collision = self.check_collision()
         if collision == "crashed":
-            print("crashed!!!")
+            return status_crashed
 
         if self.direction == "up":
             self.y -= 1
@@ -271,6 +280,7 @@ class Player():
         for line in self.lines:
             pygame.draw.line(screen_surface, self.color, (line.x1, line.y1), (line.x2, line.y2))
         pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 10, 4)
+
 
 
 class TopBar():
@@ -328,27 +338,24 @@ def draw_all(game_map, top_bar, screen_surface):
     pygame.display.flip()
 
 
-def start_level(map_size):
+def start_level(game_map):
     """
     map_size -> tuple(w, h)
     """
     global p1_input, p2_input
 
     # start a game level, do all the needed preparations
-    # return a GameMap object
-
-    game_map = GameMap(*map_size)
+    # return the same object that was passed in.
 
     game_map.fill_with_obstacles(10)
 
     blue = pygame.color.Color(50, 50, 220)
     red = pygame.color.Color(220, 50, 50)
 
-    p1 = Player(100, 50, blue, game_map)
+    p1 = Player(120, 290, blue, game_map)
     p1.input_dict = p1_input
     p2 = Player(500, 350, red, game_map)
     p2.input_dict = p2_input
-    players = [p1, p2]
 
     game_map.players.append(p1)
     game_map.players.append(p2)
@@ -361,7 +368,9 @@ def main():
 
     map_size = (800, 600)
 
-    game_map = start_level(map_size)
+    game_map = GameMap(0, 100, 800, 500)
+
+    game_map = start_level(game_map)
     # for now we can assume there are only 2 players
     p1 = game_map.players[0]
     p2 = game_map.players[1]
