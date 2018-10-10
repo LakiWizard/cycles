@@ -148,6 +148,28 @@ def is_opposing_direction(d1, d2):
     return False
 
 
+def is_in_rect(x, y, rx, ry, rw, rh):
+    """
+    rx, ry, ... -> rect values
+    """
+    # check if a point is within a rect
+    x1 = rx
+    y1 = ry
+    x2 = x1 + rw
+    y2 = y1 + rh
+
+    x_ok = False
+    y_ok = False
+
+    if x >= x1 and x <= x2:
+        x_ok = True
+    if y >= y1 and y <= y2:
+        y_ok = True
+
+    ok = x_ok and y_ok
+    return ok
+
+
 class Player():
     def __init__(self, x, y, color, game_map):
         self.x = x
@@ -196,6 +218,7 @@ class Player():
         status_good = "moving"
         status_crashed = "crashed"
 
+        # check for all the lines
         all_lines = []
         for p in self.game_map.players:
             for line in p.lines:
@@ -205,6 +228,12 @@ class Player():
         for line in all_lines:
             if point_on_line(self.x, self.y, line):
                 return status_crashed
+
+        # check for all the obstacles
+        for o in self.game_map.obstacles:
+            if is_in_rect(self.x, self.y, o.x, o.y, o.w, o.h):
+                return status_crashed
+
         return status_good
 
     def update(self):
