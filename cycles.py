@@ -273,8 +273,48 @@ class Player():
         pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 10, 4)
 
 
+class TopBar():
+    def __init__(self, x, y, w, h, font_object):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.font = font_object
 
-def draw_all(game_map, screen_surface):
+        self.black = pygame.Color(0, 0, 0)
+        self.white = pygame.Color(255, 255, 255)
+        self.light_grey = pygame.Color(210, 210, 210)
+
+        self.blue = pygame.color.Color(80, 80, 230)
+        self.red = pygame.color.Color(210, 70, 70)
+
+        self.rect = pygame.Rect(x, y, w, h)
+
+    def draw(self, screen_surface):
+        screen_surface.fill(self.black, self.rect)
+
+        pos1 = (self.x, self.y+self.h)
+        pos2 = (self.x+self.w, self.y+self.h)
+        pygame.draw.line(screen_surface, self.white, pos1, pos2, 3)
+
+        text_x = self.x+5
+        text_height = self.font.size("whatever")[1]
+
+        text1 = self.font.render("Cycles", False, self.light_grey)
+        screen_surface.blit(text1, (text_x, self.y))
+
+        text_x += 10
+        text2 = self.font.render("P1 score:", False, self.blue)
+        screen_surface.blit(text2, (text_x, self.y+text_height*2))
+
+        text3 = self.font.render("P2 score:", False, self.red)
+        screen_surface.blit(text3, (text_x, self.y+text_height*3))
+
+
+
+
+
+def draw_all(game_map, top_bar, screen_surface):
     game_map.draw(screen_surface)
 
     for p in game_map.players:
@@ -282,6 +322,8 @@ def draw_all(game_map, screen_surface):
 
     for o in game_map.obstacles:
         o.draw(screen_surface)
+
+    top_bar.draw(screen_surface)
 
     pygame.display.flip()
 
@@ -328,6 +370,9 @@ def main():
 
     clock = pygame.time.Clock()
 
+    font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
+    bar1 = TopBar(0, 0, 800, 100, font1)
+
     game_running = True
     while game_running:
         all_events = pygame.event.get()
@@ -341,7 +386,7 @@ def main():
         p1.update()
         p2.update()
 
-        draw_all(game_map, screen_surface)
+        draw_all(game_map, bar1, screen_surface)
         clock.tick(60)
 
     deinitialize()
