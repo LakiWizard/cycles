@@ -190,6 +190,9 @@ class Player():
         # hold a reference to the map you are on
         self.game_map = game_map
 
+        # count your own score
+        self.score = 0
+
     def handle_input(self):
         global all_events
 
@@ -284,7 +287,7 @@ class Player():
 
 
 class TopBar():
-    def __init__(self, x, y, w, h, font_object):
+    def __init__(self, x, y, w, h, font_object, p1, p2):
         self.x = x
         self.y = y
         self.w = w
@@ -295,10 +298,14 @@ class TopBar():
         self.white = pygame.Color(255, 255, 255)
         self.light_grey = pygame.Color(210, 210, 210)
 
-        self.blue = pygame.color.Color(80, 80, 230)
-        self.red = pygame.color.Color(210, 70, 70)
-
         self.rect = pygame.Rect(x, y, w, h)
+
+        # the player objects, used for counting the scores
+        self.p1 = p1
+        self.p2 = p2
+
+        self.p1_color = p1.color
+        self.p2_color = p2.color
 
     def draw(self, screen_surface):
         screen_surface.fill(self.black, self.rect)
@@ -314,11 +321,22 @@ class TopBar():
         screen_surface.blit(text1, (text_x, self.y))
 
         text_x += 10
-        text2 = self.font.render("P1 score:", False, self.blue)
-        screen_surface.blit(text2, (text_x, self.y+text_height*2))
 
-        text3 = self.font.render("P2 score:", False, self.red)
+        # essentialy drawing the scores where the text is colored
+        # the players' colors and the actual numbers are white.
+        # it is indeed needlesly complicated, but pygame seems
+        # to have no easy way of drawing multi-colored text.
+        text2 = self.font.render("P1 score:", False, self.p1_color)
+        screen_surface.blit(text2, (text_x, self.y+text_height*2))
+        score1_x = self.font.size("P1 score:")[0] + text_x
+        score1 = self.font.render(str(self.p1.score), False, self.white)
+        screen_surface.blit(score1, (score1_x, self.y+text_height*2))
+
+        text3 = self.font.render("P2 score:", False, self.p2_color)
         screen_surface.blit(text3, (text_x, self.y+text_height*3))
+        score2_x = self.font.size("P2 score:")[0] + text_x
+        score2 = self.font.render(str(self.p2.score), False, self.white)
+        screen_surface.blit(score2, (score2_x, self.y+text_height*3))
 
 
 
@@ -338,25 +356,14 @@ def draw_all(game_map, top_bar, screen_surface):
     pygame.display.flip()
 
 
-def start_level(game_map):
+def start_level(game_map, p1, p2):
     """
     map_size -> tuple(w, h)
     """
-    global p1_input, p2_input
-
     # start a game level, do all the needed preparations
     # return the same object that was passed in.
 
     game_map.fill_with_obstacles(10)
-
-    blue = pygame.color.Color(50, 50, 220)
-    red = pygame.color.Color(220, 50, 50)
-
-    p1 = Player(120, 290, blue, game_map)
-    p1.input_dict = p1_input
-    p2 = Player(500, 350, red, game_map)
-    p2.input_dict = p2_input
-
     game_map.players.append(p1)
     game_map.players.append(p2)
 
@@ -370,17 +377,23 @@ def main():
 
     game_map = GameMap(0, 100, 800, 500)
 
-    game_map = start_level(game_map)
+    blue = pygame.color.Color(50, 50, 220)
+    red = pygame.color.Color(220, 50, 50)
+
     # for now we can assume there are only 2 players
-    p1 = game_map.players[0]
-    p2 = game_map.players[1]
+    p1 = Player(120, 290, blue, game_map)
+    p1.input_dict = p1_input
+    p2 = Player(500, 350, red, game_map)
+    p2.input_dict = p2_input
+
+    game_map = start_level(game_map, p1, p2)
 
     screen_surface = initialize(*map_size)
 
     clock = pygame.time.Clock()
 
     font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
-    bar1 = TopBar(0, 0, 800, 100, font1)
+    bar1 = TopBar(0, 0, 800, 100, font1, p1, p2)
 
     game_running = True
     while game_running:
@@ -392,11 +405,21 @@ def main():
 
         p1.handle_input()
         p2.handle_input()
-        p1.update()
-        p2.update()
+
+        status = p1.update()
+        if status == "crashed":
+            p2.score += 1
+            game_running = False
+
+        status = p2.update()
+        if status == "crashed":
+            p1.score += 1
+            game_running = False
 
         draw_all(game_map, bar1, screen_surface)
         clock.tick(60)
+
+    pygame.time.delay(2000)
 
     deinitialize()
 
