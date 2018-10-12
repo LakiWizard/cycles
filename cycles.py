@@ -340,6 +340,27 @@ class TopBar():
 
 
 
+def pause_game(screen_surface, font, screen_size):
+    white = pygame.Color(255, 255, 255)
+    text1 = font.render("Press P to continue", False, white)
+
+    text_x = screen_size[0] // 2 - 80
+    text_y = screen_size[1] // 2
+
+    screen_surface.blit(text1, (text_x, text_y))
+    pygame.display.flip()
+
+    clock = pygame.time.Clock()
+
+    pressed = False
+    while not pressed:
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
+                pressed = True
+
+        clock.tick(10)
+
 
 
 def draw_all(game_map, top_bar, screen_surface):
@@ -373,7 +394,7 @@ def start_level(game_map, p1, p2):
 def main():
     global all_events
 
-    map_size = (800, 600)
+    screen_size = (800, 600)
 
     game_map = GameMap(0, 100, 800, 500)
 
@@ -388,7 +409,7 @@ def main():
 
     game_map = start_level(game_map, p1, p2)
 
-    screen_surface = initialize(*map_size)
+    screen_surface = initialize(*screen_size)
 
     clock = pygame.time.Clock()
 
@@ -400,8 +421,11 @@ def main():
         all_events = pygame.event.get()
 
         for e in all_events:
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-                game_running = False
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    game_running = False
+                elif e.key == pygame.K_p:
+                    pause_game(screen_surface, font1, screen_size)
 
         p1.handle_input()
         p2.handle_input()
