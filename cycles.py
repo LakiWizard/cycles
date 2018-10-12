@@ -361,6 +361,33 @@ def pause_game(screen_surface, font, screen_size):
 
         clock.tick(10)
 
+def end_game_dialog(screen_surface, font, screen_size):
+    white = pygame.Color(255, 255, 255)
+
+    text1 = font.render("(F)inish game or (r)ematch?", False, white)
+
+    text_x = screen_size[0] // 2 - 100
+    text_y = screen_size[1] // 2
+
+    screen_surface.blit(text1, (text_x, text_y))
+    pygame.display.flip()
+
+    clock = pygame.time.Clock()
+
+    response = None
+    while response is None:
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_f:
+                    response = "finish"
+                if e.key == pygame.K_r:
+                    response = "rematch"
+
+        clock.tick(10)
+
+    return response
+
 
 
 def draw_all(game_map, top_bar, screen_surface):
@@ -377,16 +404,29 @@ def draw_all(game_map, top_bar, screen_surface):
     pygame.display.flip()
 
 
-def start_level(game_map, p1, p2):
+def start_level(p1, p2):
     """
     map_size -> tuple(w, h)
     """
     # start a game level, do all the needed preparations
-    # return the same object that was passed in.
+    # return a GameMap object
 
+    # first reset the stuff that may be left over from the previous
+    # match.
+    p1.lines.clear()
+    p2.lines.clear()
+    p1.x = 120
+    p1.y = 290
+    p2.x = 500
+    p2.y = 350
+
+    game_map = GameMap(0, 100, 800, 500)
     game_map.fill_with_obstacles(10)
     game_map.players.append(p1)
     game_map.players.append(p2)
+
+    p1.game_map = game_map
+    p2.game_map = game_map
 
     return game_map
 
@@ -396,18 +436,16 @@ def main():
 
     screen_size = (800, 600)
 
-    game_map = GameMap(0, 100, 800, 500)
-
     blue = pygame.color.Color(50, 50, 220)
     red = pygame.color.Color(220, 50, 50)
 
-    # for now we can assume there are only 2 players
-    p1 = Player(120, 290, blue, game_map)
+    # for now we can assume there are only 2 players.
+    # game_map arg can be None since that will be handled
+    # in start_level.
+    p1 = Player(0, 0, blue, None)
     p1.input_dict = p1_input
-    p2 = Player(500, 350, red, game_map)
+    p2 = Player(0, 0, red, None)
     p2.input_dict = p2_input
-
-    game_map = start_level(game_map, p1, p2)
 
     screen_surface = initialize(*screen_size)
 
@@ -416,34 +454,41 @@ def main():
     font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
     bar1 = TopBar(0, 0, 800, 100, font1, p1, p2)
 
-    game_running = True
-    while game_running:
-        all_events = pygame.event.get()
+    all_matches_finished = False
+    while not all_matches_finished:
 
-        for e in all_events:
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_ESCAPE:
-                    game_running = False
-                elif e.key == pygame.K_p:
-                    pause_game(screen_surface, font1, screen_size)
+        game_map = start_level(p1, p2)
 
-        p1.handle_input()
-        p2.handle_input()
+        game_running = True
+        while game_running:
+            all_events = pygame.event.get()
 
-        status = p1.update()
-        if status == "crashed":
-            p2.score += 1
-            game_running = False
+            for e in all_events:
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_ESCAPE:
+                        game_running = False
+                    elif e.key == pygame.K_p:
+                        pause_game(screen_surface, font1, screen_size)
 
-        status = p2.update()
-        if status == "crashed":
-            p1.score += 1
-            game_running = False
+            p1.handle_input()
+            p2.handle_input()
 
-        draw_all(game_map, bar1, screen_surface)
-        clock.tick(60)
+            status = p1.update()
+            if status == "crashed":
+                p2.score += 1
+                game_running = False
 
-    pygame.time.delay(2000)
+            status = p2.update()
+            if status == "crashed":
+                p1.score += 1
+                game_running = False
+
+            draw_all(game_map, bar1, screen_surface)
+            clock.tick(60)
+
+        choice = end_game_dialog(screen_surface, font1, screen_size)
+        if choice == "finish":
+            all_matches_finished = True
 
     deinitialize()
 
