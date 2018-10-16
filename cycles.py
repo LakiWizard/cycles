@@ -366,7 +366,7 @@ def end_game_dialog(screen_surface, font, screen_size):
 
     text1 = font.render("(F)inish game or (r)ematch?", False, white)
 
-    text_x = screen_size[0] // 2 - 100
+    text_x = screen_size[0] // 2 - 135
     text_y = screen_size[1] // 2
 
     screen_surface.blit(text1, (text_x, text_y))
@@ -415,6 +415,8 @@ def start_level(p1, p2):
     # match.
     p1.lines.clear()
     p2.lines.clear()
+    p1.direction = "up"
+    p2.direction = "up"
     p1.x = 120
     p1.y = 290
     p2.x = 500
@@ -436,8 +438,8 @@ def main():
 
     screen_size = (800, 600)
 
-    blue = pygame.color.Color(50, 50, 220)
-    red = pygame.color.Color(220, 50, 50)
+    blue = pygame.color.Color(41, 143, 255)
+    red = pygame.color.Color(204, 0, 0)
 
     # for now we can assume there are only 2 players.
     # game_map arg can be None since that will be handled
