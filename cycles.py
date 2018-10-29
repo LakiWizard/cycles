@@ -46,7 +46,7 @@ class GameMap():
         self.height = h
 
         # full background and background for the still-existing parts
-        self.full_bkg = pygame.color.Color(200, 0, 200)
+        self.full_bkg = pygame.color.Color(204, 102, 0)
         self.field_bkg = pygame.color.Color(0, 0, 0)
 
         # the rect, for drawing
@@ -460,6 +460,11 @@ def main():
     blue = pygame.color.Color(41, 143, 255)
     red = pygame.color.Color(204, 0, 0)
 
+    fps_rate = 60
+    # shrink every 20 seconds
+    shrink_rate = fps_rate * 20
+    shrink_size = 20
+
     # for now we can assume there are only 2 players.
     # game_map arg can be None since that will be handled
     # in start_level.
@@ -479,6 +484,10 @@ def main():
     while not all_matches_finished:
 
         game_map = start_level(p1, p2)
+
+        # this will keep track of when the map gets reduced
+        shrink_counter = 0
+        to_shrink = shrink_rate
 
         game_running = True
         while game_running:
@@ -505,7 +514,12 @@ def main():
                 game_running = False
 
             draw_all(game_map, bar1, screen_surface)
-            clock.tick(60)
+            clock.tick(fps_rate)
+
+            shrink_counter += 1
+            if shrink_counter == to_shrink:
+                shrink_counter = 0
+                game_map.shrink(shrink_size)
 
         choice = end_game_dialog(screen_surface, font1, screen_size)
         if choice == "finish":
