@@ -32,21 +32,39 @@ p2_input = {"left": pygame.K_LEFT,
 
 class GameMap():
     def __init__(self, x, y, w, h):
+        # these are the original measures, which will no be changed
+        self.orig_x = x
+        self.orig_y = y
+        self.orig_width = w
+        self.orig_height = h
+        self.orig_rect = pygame.Rect(x, y, w, h)
+
+        # these may be changed by shrink_map
         self.x = x
         self.y = y
         self.width = w
         self.height = h
 
-        self.background = pygame.color.Color(0, 0, 0)  # map background is black
+        # full background and background for the still-existing parts
+        self.full_bkg = pygame.color.Color(200, 0, 200)
+        self.field_bkg = pygame.color.Color(0, 0, 0)
 
         # the rect, for drawing
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect = pygame.Rect(x, y, w, h)
 
         # contains all the players that are on the map
         self.players = []
 
         # contains all the obstacles on the map
         self.obstacles = []
+
+    def shrink(self, num):
+        # reduce the map width and height by num
+        self.width -= num
+        self.height -= num
+        self.x += num // 2
+        self.y += num // 2
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def fill_with_obstacles(self, num):
         # randomly put num obstacles on the map
@@ -60,7 +78,8 @@ class GameMap():
             self.obstacles.append(o)
 
     def draw(self, screen_surface):
-        screen_surface.fill(self.background, self.rect)
+        screen_surface.fill(self.full_bkg, self.orig_rect)
+        screen_surface.fill(self.field_bkg, self.rect)
 
 
 class Obstacle():
