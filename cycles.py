@@ -81,6 +81,12 @@ class GameMap():
         screen_surface.fill(self.full_bkg, self.orig_rect)
         screen_surface.fill(self.field_bkg, self.rect)
 
+        for p in self.players:
+            p.draw(screen_surface)
+
+        for o in self.obstacles:
+            o.draw(screen_surface)
+
 
 class Obstacle():
     def __init__(self, x, y, w, h):
@@ -326,7 +332,7 @@ class TopBar():
         self.p1_color = p1.color
         self.p2_color = p2.color
 
-    def draw(self, screen_surface):
+    def draw(self, screen_surface, shrink_counter, fps_rate):
         screen_surface.fill(self.black, self.rect)
 
         pos1 = (self.x, self.y+self.h)
@@ -356,6 +362,13 @@ class TopBar():
         score2_x = self.font.size("P2 score:")[0] + text_x
         score2 = self.font.render(str(self.p2.score), False, self.white)
         screen_surface.blit(score2, (score2_x, self.y+text_height*3))
+
+        # show how many seconds to map reduction
+        counter_x = self.x + self.w - 200
+        counter_y = self.y + self.h - 30
+        seconds = int(shrink_counter / fps_rate)
+        counter_text = self.font.render("Reducing in: {}".format(seconds), False, self.white)
+        screen_surface.blit(counter_text, (counter_x, counter_y))
 
 
 
@@ -406,21 +419,6 @@ def end_game_dialog(screen_surface, font, screen_size):
         clock.tick(10)
 
     return response
-
-
-
-def draw_all(game_map, top_bar, screen_surface):
-    game_map.draw(screen_surface)
-
-    for p in game_map.players:
-        p.draw(screen_surface)
-
-    for o in game_map.obstacles:
-        o.draw(screen_surface)
-
-    top_bar.draw(screen_surface)
-
-    pygame.display.flip()
 
 
 def start_level(p1, p2):
@@ -486,8 +484,8 @@ def main():
         game_map = start_level(p1, p2)
 
         # this will keep track of when the map gets reduced
-        shrink_counter = 0
         to_shrink = shrink_rate
+        shrink_counter = shrink_rate
 
         game_running = True
         while game_running:
@@ -513,12 +511,16 @@ def main():
                 p1.score += 1
                 game_running = False
 
-            draw_all(game_map, bar1, screen_surface)
+            # draw everything here
+            game_map.draw(screen_surface)
+            bar1.draw(screen_surface, shrink_counter, fps_rate)
+            pygame.display.flip()
+
             clock.tick(fps_rate)
 
-            shrink_counter += 1
-            if shrink_counter == to_shrink:
-                shrink_counter = 0
+            shrink_counter -= 1
+            if shrink_counter == 0:
+                shrink_counter = shrink_rate
                 game_map.shrink(shrink_size)
 
         choice = end_game_dialog(screen_surface, font1, screen_size)
