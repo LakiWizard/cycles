@@ -307,7 +307,7 @@ class Player():
     def draw(self, screen_surface):
         for line in self.lines:
             pygame.draw.line(screen_surface, self.color, (line.x1, line.y1), (line.x2, line.y2))
-        pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 10, 4)
+        pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 8, 3)
 
 
 
