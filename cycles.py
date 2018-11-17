@@ -112,6 +112,39 @@ class Line():
         self.x2 = x2
         self.y2 = y2
 
+
+class Button():
+    def __init__(self, x, y, w, h, font, parent_surface, text="", action=None):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.rect = pygame.Rect(x, y, w, h)
+
+        # text is button 'caption', action is function callback
+        self.text = text
+        self.action = action
+
+        # pygame.Font object
+        self.font = font
+
+        self.color = pygame.color.Color(255, 255, 255)
+
+        # the surface it will be drawn on
+        self.parent_surface = parent_surface
+
+    def is_inside(self, x, y):
+        # test if a point is inside this
+        return self.rect.collidepoint(x, y)
+
+    def draw(self):
+        text_surface = self.font.render(self.text, False, self.color)
+        self.parent_surface.blit(text_surface)
+
+        pygame.draw.rect(self.parent_surface, self.color, self.rect, width=1)
+
+
+
 def point_on_line(x, y, line):
     # check if a point is on a line
     x1 = line.x1
