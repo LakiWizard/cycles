@@ -535,11 +535,11 @@ def start_level(p1, p2):
     return game_map
 
 
-def main():
+def play_game(scr_size, scr_surface, font):
     global all_events
 
-    screen_size = (800, 600)
-    screen_surface = initialize(*screen_size)
+    screen_size = scr_size
+    screen_surface = scr_surface
 
     blue = pygame.color.Color(41, 143, 255)
     red = pygame.color.Color(204, 0, 0)
@@ -559,15 +559,10 @@ def main():
 
     clock = pygame.time.Clock()
 
-    font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
+    font1 = font
     bar1 = TopBar(0, 0, 800, 100, font1, p1, p2)
 
     all_matches_finished = False
-
-    menu_choice = main_menu(screen_size, screen_surface, font1)
-    if menu_choice == "exit":
-        all_matches_finished = True
-
     while not all_matches_finished:
 
         game_map = start_level(p1, p2)
@@ -615,6 +610,23 @@ def main():
         choice = end_game_dialog(screen_surface, font1, screen_size)
         if choice == "finish":
             all_matches_finished = True
+
+
+def main():
+    scr_size = (800, 600)
+    scr_surface = initialize(*scr_size)
+
+    font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
+
+    finished = False
+    while not finished:
+        menu_choice = main_menu(scr_size, scr_surface, font1)
+        if menu_choice == "start":
+            play_game(scr_size, scr_surface, font1)
+        elif menu_choice == "about":
+            pass
+        elif menu_choice == "exit":
+            finished = True
 
     deinitialize()
 
