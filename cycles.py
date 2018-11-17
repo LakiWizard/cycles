@@ -139,9 +139,9 @@ class Button():
 
     def draw(self):
         text_surface = self.font.render(self.text, False, self.color)
-        self.parent_surface.blit(text_surface)
+        self.parent_surface.blit(text_surface, self.rect)
 
-        pygame.draw.rect(self.parent_surface, self.color, self.rect, width=1)
+        pygame.draw.rect(self.parent_surface, self.color, self.rect, 1)
 
 
 
@@ -405,6 +405,47 @@ class TopBar():
 
 
 
+def main_menu(scr_size, scr_surface, font):
+    button_x = (scr_size[0] // 2) - 20
+    button1_y = (scr_size[1] // 2) - 50
+    button2_y = button1_y + 50
+    button3_y = button2_y + 50
+
+    button1 = Button(button_x, button1_y, 80, 30, font, scr_surface, "Start")
+    button2 = Button(button_x, button2_y, 80, 30, font, scr_surface, "About")
+    button3 = Button(button_x, button3_y, 80, 30, font, scr_surface, "Exit")
+    buttons = [button1, button2, button3]
+
+    scr_surface.fill(pygame.Color(0, 0, 0))
+    for button in buttons:
+        button.draw()
+    pygame.display.flip()
+
+    clock = pygame.time.Clock()
+
+    button_clicked = None
+    while button_clicked is None:
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                pos = pygame.mouse.get_pos()
+
+                for button in buttons:
+                    if button.is_inside(pos[0], pos[1]):
+                        button_clicked = button
+
+        clock.tick(10)
+
+    if button_clicked is button1:
+        return "start"
+    elif button_clicked is button2:
+        return "about"
+    elif button_clicked is button3:
+        return "exit"
+
+
+
+
 def pause_game(screen_surface, font, screen_size):
     white = pygame.Color(255, 255, 255)
     text1 = font.render("Press P to continue", False, white)
@@ -487,6 +528,7 @@ def main():
     global all_events
 
     screen_size = (800, 600)
+    screen_surface = initialize(*screen_size)
 
     blue = pygame.color.Color(41, 143, 255)
     red = pygame.color.Color(204, 0, 0)
@@ -504,14 +546,17 @@ def main():
     p2 = Player(0, 0, red, None)
     p2.input_dict = p2_input
 
-    screen_surface = initialize(*screen_size)
-
     clock = pygame.time.Clock()
 
     font1 = pygame.font.Font("DejaVuSansMono.ttf", 18)
     bar1 = TopBar(0, 0, 800, 100, font1, p1, p2)
 
     all_matches_finished = False
+
+    menu_choice = main_menu(screen_size, screen_surface, font1)
+    if menu_choice == "exit":
+        all_matches_finished = True
+
     while not all_matches_finished:
 
         game_map = start_level(p1, p2)
