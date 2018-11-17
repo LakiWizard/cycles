@@ -139,7 +139,17 @@ class Button():
 
     def draw(self):
         text_surface = self.font.render(self.text, False, self.color)
-        self.parent_surface.blit(text_surface, self.rect)
+
+        # center-align the text
+        text_w = self.font.size(self.text)[0]
+        box_w = self.w
+        x_margin = (box_w - text_w) // 2
+
+        text_h = self.font.size(self.text)[1]
+        box_h = self.h
+        y_margin = (box_h - text_h) // 2
+
+        self.parent_surface.blit(text_surface, (self.x+x_margin, self.y+y_margin))
 
         pygame.draw.rect(self.parent_surface, self.color, self.rect, 1)
 
@@ -406,14 +416,15 @@ class TopBar():
 
 
 def main_menu(scr_size, scr_surface, font):
-    button_x = (scr_size[0] // 2) - 20
-    button1_y = (scr_size[1] // 2) - 50
-    button2_y = button1_y + 50
-    button3_y = button2_y + 50
+    button1_y = (scr_size[1] // 2) - 80
+    button2_y = button1_y + 70
+    button3_y = button2_y + 70
+    button_w = 120
+    button_x = (scr_size[0] - button_w) // 2
 
-    button1 = Button(button_x, button1_y, 80, 30, font, scr_surface, "Start")
-    button2 = Button(button_x, button2_y, 80, 30, font, scr_surface, "About")
-    button3 = Button(button_x, button3_y, 80, 30, font, scr_surface, "Exit")
+    button1 = Button(button_x, button1_y, button_w, 40, font, scr_surface, "Start")
+    button2 = Button(button_x, button2_y, button_w, 40, font, scr_surface, "About")
+    button3 = Button(button_x, button3_y, button_w, 40, font, scr_surface, "Exit")
     buttons = [button1, button2, button3]
 
     scr_surface.fill(pygame.Color(0, 0, 0))
