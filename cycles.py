@@ -2,6 +2,9 @@
 import pygame
 import random
 
+# for the about page button
+import webbrowser
+
 
 all_events = None
 
@@ -502,7 +505,7 @@ def show_about_screen(scr_size, scr_surface):
     back_button  = Button(back_x, back_y, back_w, 40, font, scr_surface, "Back")
     back_button.draw()
 
-    page_button.action = print
+    page_button.action = lambda: webbrowser.open_new_tab(page_button_str)
     back_button.action = lambda: None
     buttons = [page_button, back_button]
 
