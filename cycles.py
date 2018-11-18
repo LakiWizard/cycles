@@ -456,6 +456,79 @@ def main_menu(scr_size, scr_surface, font):
 
 
 
+def show_about_screen(scr_size, scr_surface):
+    font = pygame.font.Font("DejaVuSansMono.ttf", 18)
+    font_big = pygame.font.Font("DejaVuSansMono.ttf", 24)
+
+    x_margin = 30
+
+    white = pygame.Color(255, 255, 255)
+
+    scr_surface.fill(pygame.Color(0, 0, 0))
+
+    cycles = font_big.render("Cycles", False, white)
+    cycles_y = 20
+    scr_surface.blit(cycles, (x_margin, cycles_y))
+
+    made_by_str = "Designed and programmed by LakiWizard"
+    made_by_y = cycles_y + 100
+    made_by = font.render(made_by_str, False, white)
+    scr_surface.blit(made_by, (x_margin, made_by_y))
+
+    web_page_str = "To get the latest version and source code, go to:"
+    page_button_str = "https://github.com/LakiWizard/cycles/"
+
+    web_page_y = made_by_y + 80
+    page_button_y = web_page_y + 50
+
+    web_page = font.render(web_page_str, False, white)
+    page_button = Button(x_margin, page_button_y, 420, 30, font, scr_surface, page_button_str)
+    scr_surface.blit(web_page, (x_margin, web_page_y))
+    page_button.draw()
+
+    readme_notice = "For more information, see README.md"
+    readme_y = page_button_y + 80
+    readme = font.render(readme_notice, False, white)
+    scr_surface.blit(readme, (x_margin, readme_y))
+
+    glhf_notice = "Have fun!"
+    glhf_y = readme_y + 120
+    glhf = font.render(glhf_notice, False, white)
+    scr_surface.blit(glhf, (x_margin, glhf_y))
+
+    back_w = 80
+    back_x = (scr_size[0] // 2) - (back_w // 2)
+    back_y = glhf_y + 80
+    back_button  = Button(back_x, back_y, back_w, 40, font, scr_surface, "Back")
+    back_button.draw()
+
+    page_button.action = print
+    back_button.action = lambda: None
+    buttons = [page_button, back_button]
+
+    pygame.display.flip()
+
+
+    clock = pygame.time.Clock()
+
+    button_clicked = None
+    while button_clicked is None:
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                pos = pygame.mouse.get_pos()
+
+                for button in buttons:
+                    if button.is_inside(pos[0], pos[1]):
+                        button_clicked = button
+
+        clock.tick(10)
+
+    button_clicked.action()
+
+
+
+
 
 def pause_game(screen_surface, font, screen_size):
     white = pygame.Color(255, 255, 255)
@@ -624,7 +697,7 @@ def main():
         if menu_choice == "start":
             play_game(scr_size, scr_surface, font1)
         elif menu_choice == "about":
-            pass
+            show_about_screen(scr_size, scr_surface)
         elif menu_choice == "exit":
             finished = True
 
