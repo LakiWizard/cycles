@@ -9,7 +9,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 # include the font file
-to_include = ["DejaVuSansMono.ttf"]
+to_include = ["DejaVuSansMono.ttf", "README.md"]
 
 options = {
     "build_exe": {
@@ -18,7 +18,7 @@ options = {
 }
 
 setup(name="Cycles",
-      version="1.0",
+      version="1.1",
       executables=[Executable("cycles.py", base=base)],
       options=options
       )
