@@ -132,6 +132,7 @@ class Button():
         self.font = font
 
         self.color = pygame.color.Color(255, 255, 255)
+        self.bkg_color = pygame.color.Color(0, 0, 0)
 
         # the surface it will be drawn on
         self.parent_surface = parent_surface
@@ -151,6 +152,9 @@ class Button():
         text_h = self.font.size(self.text)[1]
         box_h = self.h
         y_margin = (box_h - text_h) // 2
+
+        # first fill with background, then text and boundary
+        pygame.draw.rect(self.parent_surface, self.bkg_color, self.rect, 0)
 
         self.parent_surface.blit(text_surface, (self.x+x_margin, self.y+y_margin))
 
@@ -486,6 +490,8 @@ def show_about_screen(scr_size, scr_surface):
 
     web_page = font.render(web_page_str, False, white)
     page_button = Button(x_margin, page_button_y, 420, 30, font, scr_surface, page_button_str)
+    page_button.color = pygame.Color(0, 0, 0)
+    page_button.bkg_color = pygame.Color(255, 255, 255)
     scr_surface.blit(web_page, (x_margin, web_page_y))
     page_button.draw()
 
