@@ -213,6 +213,46 @@ def point_on_line(x, y, line):
             return False
 
 
+def line_through_line(line1, line2):
+    # if first line is vertical
+    if line1.x1 == line1.x2:
+        line1_x = line1.x1
+
+        # if second line is horizontal
+        if line2.y1 == line2.y2:
+            # if x points are on opposite ends
+            if (line2.x1 >= line1_x and line2.x2 <= line1_x) or (line2.x1 <= line1_x and line2.x2 >= line1_x):
+                return True
+
+        # if second line is vertical
+        elif line2.x1 == line2.x2:
+            # x is irrelevant here
+            x = line2.x1
+            # if any of the endpoints is on first line, they intersect
+            if point_on_line(x, line2.y1, line1) or point_on_line(x, line2.y2, line1):
+                return True
+
+    # first line is horizontal
+    elif line1.y1 == line1.y2:
+        line1_y = line1.y1
+
+        # if second line is horizontal
+        if line2.y1 == line2.y2:
+            # y is irrelevant here
+            y = line2.y1
+            # if any of the endpoints is on first line, they intersect
+            if point_on_line(line2.x1, y, line1) or point_on_line(line2.x2, y, line1):
+                return True
+
+        # if second line is vertical
+        elif line2.x1 == line2.x2:
+            # if y points are on opposite ends
+            if (line2.y1 >= line1_y and line2.y2 <= line1_y) or (line2.y1 <= line1_y and line2.y2 >= line1_y):
+                return True
+
+    return False
+
+
 def is_opposing_direction(d1, d2):
     # check if two directions are opposing
 
@@ -363,6 +403,26 @@ class Player():
 class AIPlayer(Player):
     def __init__(self, x, y, color, game_map):
         super().__init__(x, y, color, game_map)
+
+    def line_is_clear(self, line):
+        # check if this line intersects any obstacles, lines or
+        # reaches map edge.
+        # check for all the lines
+
+        all_lines = []
+        for p in self.game_map.players:
+            for line in p.lines:
+                all_lines.append(line)
+
+        # all_lines.remove(self.lines[0])
+        for line in all_lines:
+            if point_on_line(self.x, self.y, line):
+                return status_crashed
+
+        # check for all the obstacles
+        for o in self.game_map.obstacles:
+            if is_in_rect(self.x, self.y, o.x, o.y, o.w, o.h):
+                return status_crashed
 
     def handle_input(self):
         new_direction = self.direction
@@ -729,5 +789,15 @@ def main():
 
     deinitialize()
 
+# line through line tests
+
+# line1 = Line(4, 1, 4, 8)
+# line2 = Line(2, 6, 9, 6)
+# # should be true
+# print(line_through_line(line1, line2))
+# line1 = Line(1, 1, 1, 5)
+# line2 = Line(5, 1, 5, 6)
+# # should be false
+# print(line_through_line(line1, line2))
 
 main()
