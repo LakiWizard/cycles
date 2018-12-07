@@ -360,6 +360,23 @@ class Player():
         pygame.draw.circle(screen_surface, self.color, (self.x, self.y), 8, 3)
 
 
+class AIPlayer(Player):
+    def __init__(self, x, y, color, game_map):
+        super().__init__(x, y, color, game_map)
+
+    def handle_input(self):
+        new_direction = self.direction
+
+        # you cant go in reverse
+        if is_opposing_direction(new_direction, self.direction):
+            return None
+
+        self.direction = new_direction
+
+        # start new line when changing direction
+        self.start_new_line()
+
+
 
 class TopBar():
     def __init__(self, x, y, w, h, font_object, p1, p2):
