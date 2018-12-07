@@ -107,6 +107,20 @@ class Obstacle():
     def draw(self, screen_surface):
         screen_surface.fill(self.color, self.rect)
 
+    def get_bounding_lines(self):
+        # returns a list of 4 lines that are the edges of the rect
+        rx1 = self.x
+        rx2 = self.x+self.w
+        ry1 = self.y
+        ry2 = self.y+self.h
+
+        edge1 = Line(rx1, ry1, rx2, ry1)
+        edge2 = Line(rx1, ry1, rx1, ry2)
+        edge3 = Line(rx2, ry1, rx2, ry2)
+        edge4 = Line(rx1, ry2, rx2, ry2)
+
+        return [edge1, edge2, edge3, edge4]
+
 
 class Line():
     def __init__(self, x1, y1, x2, y2):
@@ -288,6 +302,25 @@ def is_in_rect(x, y, rx, ry, rw, rh):
 
     ok = x_ok and y_ok
     return ok
+
+
+def line_in_rect(line, rect):
+    # check if line intersects a rect
+
+    # first check if any endings are inside rect, for possible
+    # early exit.
+    if is_in_rect(line.x1, line.y1, rect.x, rect.y, rect.w, rect.h):
+        return True
+    if is_in_rect(line.x2, line.y2, rect.x, rect.y, rect.w, rect.h):
+        return True
+
+    # if first test fails, then check if the line intersects
+    # any of the edges of the rect.
+    for edge in rect.get_bounding_lines():
+        if line_through_line(line, edge):
+            return True
+
+    return False
 
 
 class Player():
@@ -799,5 +832,17 @@ def main():
 # line2 = Line(5, 1, 5, 6)
 # # should be false
 # print(line_through_line(line1, line2))
+
+
+# line through rect tests
+
+# rect1 = Obstacle(2, 1, 5-2, 4-1)
+# line1 = Line(4, 2, 6, 2)
+# # should be true
+# print(line_in_rect(line1, rect1))
+# rect2 = Obstacle(2, 2, 4-2, 5-2)
+# line2 = Line(4, 7, 6, 7)
+# # should be false
+# print(line_in_rect(line2, rect2))
 
 main()
