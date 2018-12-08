@@ -480,7 +480,7 @@ class AIPlayer(Player):
         w = self.game_map.width
         h = self.game_map.height
         if not (is_in_rect(linearg.x1, linearg.y1, x, y, w, h) and is_in_rect(linearg.x2, linearg.y2, x, y, w, h)):
-            print("line not in map bounds")
+            # print("line not in map bounds")
             return False
 
         # use extend here since it has better performance
@@ -494,15 +494,15 @@ class AIPlayer(Player):
             all_lines.remove(self.lines[0])
         for line in all_lines:
             if line_through_line(linearg, line):
-                print("line goes through another line")
-                print("linearg: {}, {}, {}, {}".format(linearg.x1, linearg.y1, linearg.x2, linearg.y2))
-                print("problem line: {}, {}, {}, {}".format(line.x1, line.y1, line.x2, line.y2))
+                # print("line goes through another line")
+                # print("linearg: {}, {}, {}, {}".format(linearg.x1, linearg.y1, linearg.x2, linearg.y2))
+                # print("problem line: {}, {}, {}, {}".format(line.x1, line.y1, line.x2, line.y2))
                 return False
 
         # check for all the obstacles
         for o in self.game_map.obstacles:
             if line_in_rect(linearg, o):
-                print("line goes through obstacle")
+                # print("line goes through obstacle")
                 return False
 
         return True
@@ -551,20 +551,30 @@ class AIPlayer(Player):
     def handle_input(self):
         possible_directions = self.get_possible_directions()
 
-        new_direction = self.direction
+        test_line = self.get_line_in_direction(self.direction, 15)
+        if self.line_is_clear(test_line):
+            return None
 
-        test_line = self.get_line_in_direction(self.direction, 40)
-        if not self.line_is_clear(test_line):
-            new_direction = random.choice(possible_directions)
-            # start new line when changing direction
-            self.start_new_line()
-            print("ai: obstacles in the way, changing direction to:", new_direction)
+        wanted_free_length = 250
+        direction_to_go = None
+        while direction_to_go is None:
+            wanted_free_length -= 10
+            if wanted_free_length < 15:
+                direction_to_go = random.choice(possible_directions)
+
+            for d in possible_directions:
+                line = self.get_line_in_direction(d, wanted_free_length)
+                if self.line_is_clear(line):
+                    direction_to_go = d
+
+        self.direction = direction_to_go
+        # start new line when changing direction
+        self.start_new_line()
+        #print("ai: obstacles in the way, changing direction to:", self.direction)
 
         # you cant go in reverse
         #if is_opposing_direction(new_direction, self.direction):
         #    return None
-
-        self.direction = new_direction
 
 
 
@@ -919,8 +929,7 @@ def main():
 
     deinitialize()
 
-
-line_collision_tests()
+#line_collision_tests()
 
 if __name__ == "__main__":
     main()
