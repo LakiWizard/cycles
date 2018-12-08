@@ -475,27 +475,40 @@ class AIPlayer(Player):
     def __init__(self, x, y, color, game_map):
         super().__init__(x, y, color, game_map)
 
-    def line_is_clear(self, line):
+    def line_is_clear(self, linearg):
         # check if this line intersects any obstacles, lines or
         # reaches map edge.
-        # check for all the lines
 
+        # first check if it is in map bounds
+        x = self.game_map.x
+        y = self.game_map.y
+        w = self.game_map.width
+        h = self.game_map.height
+        map_rect = Obstacle(x, y, w, h)
+        if not line_in_rect(linearg, map_rect):
+            return False
+
+        # use extend here since it has better performance
+        # with many elements.
         all_lines = []
         for p in self.game_map.players:
-            for line in p.lines:
-                all_lines.append(line)
+            all_lines.extend(p.lines)
 
         # all_lines.remove(self.lines[0])
         for line in all_lines:
-            if point_on_line(self.x, self.y, line):
-                return status_crashed
+            if line_through_line(linearg, line):
+                return False
 
         # check for all the obstacles
         for o in self.game_map.obstacles:
-            if is_in_rect(self.x, self.y, o.x, o.y, o.w, o.h):
-                return status_crashed
+            if line_in_rect(linearg, o):
+                return False
+
+        return True
 
     def handle_input(self):
+        possible_directions = ["up", "down", "left", "right"].remove(self.direction)
+
         new_direction = self.direction
 
         # you cant go in reverse
@@ -505,7 +518,7 @@ class AIPlayer(Player):
         self.direction = new_direction
 
         # start new line when changing direction
-        self.start_new_line()
+        # self.start_new_line()
 
 
 
@@ -784,7 +797,7 @@ def play_game(scr_size, scr_surface, font):
     # in start_level.
     p1 = Player(0, 0, blue, None)
     p1.input_dict = p1_input
-    p2 = Player(0, 0, red, None)
+    p2 = AIPlayer(0, 0, red, None)
     p2.input_dict = p2_input
 
     clock = pygame.time.Clock()
