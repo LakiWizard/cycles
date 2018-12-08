@@ -227,45 +227,36 @@ def point_on_line(x, y, line):
             return False
 
 
-def line_through_line(line1, line2):
-    # if first line is vertical
-    if line1.x1 == line1.x2:
-        line1_x = line1.x1
+def point_on_line2(px, py, line):
+    # this implementation is probably a fair bit faster
 
-        # if second line is horizontal
-        if line2.y1 == line2.y2:
-            # if x points are on opposite ends
-            if (line2.x1 >= line1_x and line2.x2 <= line1_x) or (line2.x1 <= line1_x and line2.x2 >= line1_x):
-                return True
-
-        # if second line is vertical
-        elif line2.x1 == line2.x2:
-            # x is irrelevant here
-            x = line2.x1
-            # if any of the endpoints is on first line, they intersect
-            if point_on_line(x, line2.y1, line1) or point_on_line(x, line2.y2, line1):
-                return True
-
-    # first line is horizontal
-    elif line1.y1 == line1.y2:
-        line1_y = line1.y1
-
-        # if second line is horizontal
-        if line2.y1 == line2.y2:
-            # y is irrelevant here
-            y = line2.y1
-            # if any of the endpoints is on first line, they intersect
-            if point_on_line(line2.x1, y, line1) or point_on_line(line2.x2, y, line1):
-                return True
-
-        # if second line is vertical
-        elif line2.x1 == line2.x2:
-            # if y points are on opposite ends
-            if (line2.y1 >= line1_y and line2.y2 <= line1_y) or (line2.y1 <= line1_y and line2.y2 >= line1_y):
-                return True
+    if px >= min(line.x1, line.x2) and px <= max(line.x1, line.x2):
+        if py >= min(line.y1, line.y2) and px <= max(line.y1, line.y2):
+            return True
 
     return False
 
+
+def line_through_line(line1, line2):
+    # current implementation is very inefficient, may use lots of cpu
+    # it basically goes through every point and see if it intersects
+    # the target line.
+
+    # first line is vertical
+    if line1.x1 == line1.x2:
+        x = line1.x1
+        for y in range(min(line1.y1, line1.y2), max(line1.y1, line1.y2)+1):
+            if point_on_line2(x, y, line2):
+                return True
+
+    # first line is horizontal
+    if line1.y1 == line1.y2:
+        y = line1.y1
+        for x in range(min(line1.x1, line1.x2), max(line1.x1, line1.x2)+1):
+            if point_on_line2(x, y, line2):
+                return True
+
+    return False
 
 def is_opposing_direction(d1, d2):
     # check if two directions are opposing
@@ -340,6 +331,10 @@ def line_collision_tests():
     line1 = Line(2, 1, 2, 4)
     line2 = Line(2, 4, 4, 4)
     print("should be true:", line_through_line(line1, line2))
+
+    line1 = Line(5, 2, 15, 2)
+    line2 = Line(9, 4, 9, 8)
+    print("should be false:", line_through_line(line1, line2))
 
 
     # line through rect tests
@@ -500,6 +495,8 @@ class AIPlayer(Player):
         for line in all_lines:
             if line_through_line(linearg, line):
                 print("line goes through another line")
+                print("linearg: {}, {}, {}, {}".format(linearg.x1, linearg.y1, linearg.x2, linearg.y2))
+                print("problem line: {}, {}, {}, {}".format(line.x1, line.y1, line.x2, line.y2))
                 return False
 
         # check for all the obstacles
@@ -533,10 +530,12 @@ class AIPlayer(Player):
 
         return Line(x1, y1, x2, y2)
 
-    def handle_input(self):
+    def get_possible_directions(self):
+        # all the directions in which we can turn
         possible_directions = ["up", "down", "left", "right"]
-        # print(possible_directions)
+
         possible_directions.remove(self.direction)
+
         if self.direction == "up":
             possible_directions.remove("down")
         elif self.direction == "down":
@@ -545,7 +544,12 @@ class AIPlayer(Player):
             possible_directions.remove("right")
         elif self.direction == "right":
             possible_directions.remove("left")
-        # print(possible_directions)
+
+        return possible_directions
+
+
+    def handle_input(self):
+        possible_directions = self.get_possible_directions()
 
         new_direction = self.direction
 
@@ -916,6 +920,7 @@ def main():
     deinitialize()
 
 
-# line_collision_tests()
+line_collision_tests()
 
-main()
+if __name__ == "__main__":
+    main()
