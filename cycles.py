@@ -551,7 +551,8 @@ class AIPlayer(Player):
     def handle_input(self):
         possible_directions = self.get_possible_directions()
 
-        test_line = self.get_line_in_direction(self.direction, 15)
+        test_line_length = random.randint(11, 16)
+        test_line = self.get_line_in_direction(self.direction, test_line_length)
         if self.line_is_clear(test_line):
             return None
 
@@ -559,7 +560,7 @@ class AIPlayer(Player):
         direction_to_go = None
         while direction_to_go is None:
             wanted_free_length -= 10
-            if wanted_free_length < 15:
+            if wanted_free_length < 10:
                 direction_to_go = random.choice(possible_directions)
 
             for d in possible_directions:
