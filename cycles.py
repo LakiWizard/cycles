@@ -227,14 +227,14 @@ def point_on_line(x, y, line):
             return False
 
 
-def point_on_line2(px, py, line):
-    # this implementation is probably a fair bit faster
+# def point_on_line2(px, py, line):
+    # # this implementation is probably a fair bit faster
 
-    if px >= min(line.x1, line.x2) and px <= max(line.x1, line.x2):
-        if py >= min(line.y1, line.y2) and px <= max(line.y1, line.y2):
-            return True
+    # if px >= min(line.x1, line.x2) and px <= max(line.x1, line.x2):
+        # if py >= min(line.y1, line.y2) and px <= max(line.y1, line.y2):
+            # return True
 
-    return False
+    # return False
 
 
 def line_through_line(line1, line2):
@@ -246,14 +246,14 @@ def line_through_line(line1, line2):
     if line1.x1 == line1.x2:
         x = line1.x1
         for y in range(min(line1.y1, line1.y2), max(line1.y1, line1.y2)+1):
-            if point_on_line2(x, y, line2):
+            if point_on_line(x, y, line2):
                 return True
 
     # first line is horizontal
     if line1.y1 == line1.y2:
         y = line1.y1
         for x in range(min(line1.x1, line1.x2), max(line1.x1, line1.x2)+1):
-            if point_on_line2(x, y, line2):
+            if point_on_line(x, y, line2):
                 return True
 
     return False
