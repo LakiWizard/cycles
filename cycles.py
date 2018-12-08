@@ -323,6 +323,44 @@ def line_in_rect(line, rect):
     return False
 
 
+def line_collision_tests():
+    # some tests to check whether line_through_line and
+    # line_in_rect work correctly.
+
+    # line through line tests
+
+    line1 = Line(4, 1, 4, 8)
+    line2 = Line(2, 6, 9, 6)
+    # should be true
+    print("should be true:", line_through_line(line1, line2))
+    line1 = Line(1, 1, 1, 5)
+    line2 = Line(5, 1, 5, 6)
+    # should be false
+    print("should be false:", line_through_line(line1, line2))
+    line1 = Line(2, 1, 2, 4)
+    line2 = Line(2, 4, 4, 4)
+    print("should be true:", line_through_line(line1, line2))
+
+
+    # line through rect tests
+
+    rect1 = Obstacle(2, 1, 5-2, 4-1)
+    line1 = Line(4, 2, 6, 2)
+    # should be true
+    print("should be true:", line_in_rect(line1, rect1))
+    rect1 = Obstacle(2, 2, 4-2, 5-2)
+    line1 = Line(4, 7, 6, 7)
+    # should be false
+    print("should be false:", line_in_rect(line1, rect1))
+    rect1 = Obstacle(1, 2, 4-1, 5-2)
+    line1 = Line(2, 3, 3, 3)
+    print("should be true:", line_in_rect(line1, rect1))
+    rect1 = Obstacle(1, 1, 4-1, 4-1)
+    line1 = Line(4, 4, 4, 5)
+    print("should be true:", line_in_rect(line1, rect1))
+
+
+
 class Player():
     def __init__(self, x, y, color, game_map):
         self.x = x
@@ -822,27 +860,7 @@ def main():
 
     deinitialize()
 
-# line through line tests
 
-# line1 = Line(4, 1, 4, 8)
-# line2 = Line(2, 6, 9, 6)
-# # should be true
-# print(line_through_line(line1, line2))
-# line1 = Line(1, 1, 1, 5)
-# line2 = Line(5, 1, 5, 6)
-# # should be false
-# print(line_through_line(line1, line2))
-
-
-# line through rect tests
-
-# rect1 = Obstacle(2, 1, 5-2, 4-1)
-# line1 = Line(4, 2, 6, 2)
-# # should be true
-# print(line_in_rect(line1, rect1))
-# rect2 = Obstacle(2, 2, 4-2, 5-2)
-# line2 = Line(4, 7, 6, 7)
-# # should be false
-# print(line_in_rect(line2, rect2))
+# line_collision_tests()
 
 main()
