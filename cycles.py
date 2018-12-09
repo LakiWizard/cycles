@@ -227,36 +227,86 @@ def point_on_line(x, y, line):
             return False
 
 
-# def point_on_line2(px, py, line):
-    # # this implementation is probably a fair bit faster
+def get_line_bounding_box(line):
+    # returns ((x1, y1), (x2, y2))
+    p1 = (min(line.x1, line.x2), min(line.y1, line.y2))
+    p2 = (max(line.x1, line.x2), max(line.y1, line.y2))
+    return (p1, p2)
 
-    # if px >= min(line.x1, line.x2) and px <= max(line.x1, line.x2):
-        # if py >= min(line.y1, line.y2) and px <= max(line.y1, line.y2):
-            # return True
 
-    # return False
+def bounding_box_intersect(box1, box2):
+    # check if the bounding boxes of two lines intersect
+    # box1[0][0] -> box1[first_point][x]
+    if (box1[0][0] <= box2[1][0]) and (box1[1][0] >= box2[0][0]) and (box1[0][1] <= box2[1][1]) and (box1[1][1] >= box2[0][1]):
+        return True
+    else:
+        return False
+
+
+def point_cross_product(x1, y1, x2, y2):
+    # a mathematical something
+    return x1 * y2 - x2 * y1
+
+
+def point_on_line3(x, y, line):
+    temp_line = Line(0, 0, line.x2-line.x1, line.y2-line.y1)
+    temp_x = x-line.x1
+    temp_y = y-line.y1
+
+    x = point_cross_product(temp_line.x2, temp_line.y2, temp_x, temp_y)
+    e = 0.000001
+    return abs(x) < e
+
+
+def point_right_of_line(x, y, line):
+    # determine if point is right of line or not
+
+    temp_line = Line(0, 0, line.x2-line.x1, line.y2-line.y1)
+    temp_x = x-line.x1
+    temp_y = y-line.y1
+
+    return point_cross_product(temp_line.x2, temp_line.y2, temp_x, temp_y)
+
+
+def segment_crosses_line(line1, line2):
+    # check if a line segment crosses a line
+    # here line is referred to as an infinite line to make this
+    # distinction.
+    return point_on_line3(line2.x1, line2.y1, line1) \
+        or point_on_line3(line2.x2, line2.y2, line1) \
+        or (point_right_of_line(line2.x1, line2.y1, line1) \
+        ^ point_right_of_line(line2.x2, line2.y2, line1)) \
 
 
 def line_through_line(line1, line2):
-    # current implementation is very inefficient, may use lots of cpu
-    # it basically goes through every point and see if it intersects
-    # the target line.
+    box1 = get_line_bounding_box(line1)
+    box2 = get_line_bounding_box(line2)
+    if bounding_box_intersect(box1, box2) and segment_crosses_line(line1, line2) and segment_crosses_line(line2, line1):
+        return True
+    else:
+        return False
 
-    # first line is vertical
-    if line1.x1 == line1.x2:
-        x = line1.x1
-        for y in range(min(line1.y1, line1.y2), max(line1.y1, line1.y2)+1):
-            if point_on_line(x, y, line2):
-                return True
 
-    # first line is horizontal
-    if line1.y1 == line1.y2:
-        y = line1.y1
-        for x in range(min(line1.x1, line1.x2), max(line1.x1, line1.x2)+1):
-            if point_on_line(x, y, line2):
-                return True
+# def line_through_line(line1, line2):
+    # # current implementation is very inefficient, may use lots of cpu
+    # # it basically goes through every point and see if it intersects
+    # # the target line.
 
-    return False
+    # # first line is vertical
+    # if line1.x1 == line1.x2:
+        # x = line1.x1
+        # for y in range(min(line1.y1, line1.y2), max(line1.y1, line1.y2)+1):
+            # if point_on_line(x, y, line2):
+                # return True
+
+    # # first line is horizontal
+    # if line1.y1 == line1.y2:
+        # y = line1.y1
+        # for x in range(min(line1.x1, line1.x2), max(line1.x1, line1.x2)+1):
+            # if point_on_line(x, y, line2):
+                # return True
+
+    # return False
 
 def is_opposing_direction(d1, d2):
     # check if two directions are opposing
@@ -930,7 +980,7 @@ def main():
 
     deinitialize()
 
-#line_collision_tests()
+# line_collision_tests()
 
 if __name__ == "__main__":
     main()
