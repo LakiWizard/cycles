@@ -730,6 +730,49 @@ def main_menu(scr_size, scr_surface, font):
         return "exit"
 
 
+def game_types_menu(scr_size, scr_surface, font):
+    button1_y = (scr_size[1] // 2) - 120
+    button2_y = button1_y + 70
+    button3_y = button2_y + 70
+    button4_y = button3_y + 70
+    button_w = 200
+    button_x = (scr_size[0] - button_w) // 2
+
+    button1 = Button(button_x, button1_y, button_w, 40, font, scr_surface, "Player vs Player")
+    button2 = Button(button_x, button2_y, button_w, 40, font, scr_surface, "Player vs AI")
+    button3 = Button(button_x, button3_y, button_w, 40, font, scr_surface, "Solo FFA")
+    button4 = Button(button_x, button4_y, button_w, 40, font, scr_surface, "Duo FFA")
+    buttons = [button1, button2, button3, button4]
+
+    scr_surface.fill(pygame.Color(0, 0, 0))
+    for button in buttons:
+        button.draw()
+    pygame.display.flip()
+
+    clock = pygame.time.Clock()
+
+    button_clicked = None
+    while button_clicked is None:
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                pos = pygame.mouse.get_pos()
+
+                for button in buttons:
+                    if button.is_inside(pos[0], pos[1]):
+                        button_clicked = button
+
+        clock.tick(10)
+
+    if button_clicked is button1:
+        return "pvp"
+    elif button_clicked is button2:
+        return "pve"
+    elif button_clicked is button3:
+        return "1pffa"
+    elif button_clicked is button4:
+        return "2pffa"
+
 
 def show_about_screen(scr_size, scr_surface):
     font = pygame.font.Font("DejaVuSansMono.ttf", 18)
@@ -802,9 +845,6 @@ def show_about_screen(scr_size, scr_surface):
         clock.tick(10)
 
     button_clicked.action()
-
-
-
 
 
 def pause_game(screen_surface, font, screen_size):
@@ -973,6 +1013,7 @@ def main():
         menu_choice = main_menu(scr_size, scr_surface, font1)
         if menu_choice == "start":
             play_game(scr_size, scr_surface, font1)
+            # game_types_menu(scr_size, scr_surface, font1)
         elif menu_choice == "about":
             show_about_screen(scr_size, scr_surface)
         elif menu_choice == "exit":
