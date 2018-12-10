@@ -896,7 +896,7 @@ def end_game_dialog(screen_surface, font, screen_size):
     return response
 
 
-def start_level(p1, p2):
+def start_level(player_list):
     """
     map_size -> tuple(w, h)
     """
@@ -905,27 +905,68 @@ def start_level(p1, p2):
 
     # first reset the stuff that may be left over from the previous
     # match.
-    p1.lines.clear()
-    p2.lines.clear()
-    p1.direction = "up"
-    p2.direction = "up"
-    p1.x = 120
-    p1.y = 290
-    p2.x = 500
-    p2.y = 350
+    if len(player_list) == 2:
+        p1 = player_list[0]
+        p2 = player_list[1]
 
-    game_map = GameMap(0, 100, 800, 500)
-    game_map.fill_with_obstacles(10)
-    game_map.players.append(p1)
-    game_map.players.append(p2)
+        p1.lines.clear()
+        p2.lines.clear()
+        p1.direction = "up"
+        p2.direction = "up"
+        p1.x = 120
+        p1.y = 290
+        p2.x = 500
+        p2.y = 350
 
-    p1.game_map = game_map
-    p2.game_map = game_map
+        game_map = GameMap(0, 100, 800, 500)
+        game_map.fill_with_obstacles(10)
+        game_map.players.append(p1)
+        game_map.players.append(p2)
+
+        p1.game_map = game_map
+        p2.game_map = game_map
+
+    elif len(player_list) == 6:
+        p1 = player_list[0]
+        p2 = player_list[1]
+        p3 = player_list[2]
+        p4 = player_list[3]
+        p5 = player_list[4]
+        p6 = player_list[5]
+
+        for p in player_list:
+            p.lines.clear()
+            p.direction = "up"
+
+        # top row
+        p1.x = 100
+        p1.y = 200
+        p2.x = 350
+        p2.y = 200
+        p3.x = 700
+        p3.y = 200
+
+        # bottom row
+        p4.x = 100
+        p4.y = 400
+        p5.x = 350
+        p5.y = 400
+        p6.x = 700
+        p6.y = 400
+
+        game_map = GameMap(0, 100, 800, 500)
+        game_map.fill_with_obstacles(10)
+        for p in player_list:
+            game_map.players.append(p)
+            p.game_map = game_map
+
+    else:
+        raise Exception("unsupported number of players")
 
     return game_map
 
 
-def play_game(scr_size, scr_surface, font):
+def play_game(scr_size, scr_surface, font, game_mode):
     global all_events
 
     screen_size = scr_size
@@ -933,6 +974,11 @@ def play_game(scr_size, scr_surface, font):
 
     blue = pygame.color.Color(41, 143, 255)
     red = pygame.color.Color(204, 0, 0)
+
+    yellow = pygame.color.Color(255, 255, 0)
+    green = pygame.color.Color(0, 255, 0)
+    magenta = pygame.color.Color(255, 0, 255)
+    white = pygame.color.Color(255, 255, 255)
 
     fps_rate = 60
     # shrink every 20 seconds
@@ -942,10 +988,39 @@ def play_game(scr_size, scr_surface, font):
     # for now we can assume there are only 2 players.
     # game_map arg can be None since that will be handled
     # in start_level.
-    p1 = Player(0, 0, blue, None)
-    p1.input_dict = p1_input
-    p2 = AIPlayer(0, 0, red, None)
-    p2.input_dict = p2_input
+    all_players = []
+    if game_mode == "pvp":
+        p1 = Player(0, 0, blue, None)
+        p1.input_dict = p1_input
+        p2 = Player(0, 0, red, None)
+        p2.input_dict = p2_input
+        all_players = [p1, p2]
+    elif game_mode == "pve":
+        p1 = Player(0, 0, blue, None)
+        p1.input_dict = p1_input
+        p2 = AIPlayer(0, 0, red, None)
+        all_players = [p1, p2]
+    elif game_mode == "1pffa":
+        p1 = Player(0, 0, blue, None)
+        p1.input_dict = p1_input
+        p2 = AIPlayer(0, 0, red, None)
+        p3 = AIPlayer(0, 0, green, None)
+        p4 = AIPlayer(0, 0, yellow, None)
+        p5 = AIPlayer(0, 0, magenta, None)
+        p6 = AIPlayer(0, 0, white, None)
+        all_players = [p1, p2, p3, p4, p5, p6]
+    elif game_mode == "2pffa":
+        p1 = Player(0, 0, blue, None)
+        p1.input_dict = p1_input
+        p2 = Player(0, 0, red, None)
+        p2.input_dict = p2_input
+        p3 = AIPlayer(0, 0, green, None)
+        p4 = AIPlayer(0, 0, yellow, None)
+        p5 = AIPlayer(0, 0, magenta, None)
+        p6 = AIPlayer(0, 0, white, None)
+        all_players = [p1, p2, p3, p4, p5, p6]
+    else:
+        raise Exception("unsupported gamemode")
 
     clock = pygame.time.Clock()
 
@@ -955,7 +1030,7 @@ def play_game(scr_size, scr_surface, font):
     all_matches_finished = False
     while not all_matches_finished:
 
-        game_map = start_level(p1, p2)
+        game_map = start_level(all_players)
 
         # this will keep track of when the map gets reduced
         to_shrink = shrink_rate
@@ -972,17 +1047,26 @@ def play_game(scr_size, scr_surface, font):
                     elif e.key == pygame.K_p:
                         pause_game(screen_surface, font1, screen_size)
 
-            p1.handle_input()
-            p2.handle_input()
+            crashed_players = []
 
-            status = p1.update()
-            if status == "crashed":
-                p2.score += 1
-                game_running = False
+            for p in all_players:
+                if not p in crashed_players:
+                    p.handle_input()
 
-            status = p2.update()
-            if status == "crashed":
-                p1.score += 1
+            status = ""
+            for p in all_players:
+                if not p in crashed_players:
+                    status = p.update()
+                    if status == "crashed":
+                        crashed_players.append(p)
+
+            if len(crashed_players) == len(all_players)-1:
+                uncrashed_player = None
+                for p in all_players:
+                    if not p in crashed_players:
+                        uncrashed_player = p
+
+                uncrashed_player.score += 1
                 game_running = False
 
             # draw everything here
@@ -1012,8 +1096,8 @@ def main():
     while not finished:
         menu_choice = main_menu(scr_size, scr_surface, font1)
         if menu_choice == "start":
-            play_game(scr_size, scr_surface, font1)
-            # game_types_menu(scr_size, scr_surface, font1)
+            game_mode = game_types_menu(scr_size, scr_surface, font1)
+            play_game(scr_size, scr_surface, font1, game_mode)
         elif menu_choice == "about":
             show_about_screen(scr_size, scr_surface)
         elif menu_choice == "exit":
