@@ -287,6 +287,31 @@ def line_through_line(line1, line2):
         return False
 
 
+def point_dist(x1, y1, x2, y2):
+    # a weird way to calculate the distance between 2 points
+    # (no sqrt being used)
+    return (x1 - x2)**2 + (y1 - y2)**2
+
+
+def dist_to_line_segment(x, y, line):
+    # calculate distance between a point and a line (segment)
+    # mathematical stuff
+    l = point_dist(line.x1, line.y1, line.x2, line.y2)
+    if (l == 0):
+        # if the segment is just one point, then
+        # calculate the point distance to it
+        return point_dist(x, y, line.x1, line.y1)
+
+    # calculate shortest distance between point
+    # and line segment.
+
+    # basic idea for optimizing ai:
+    # every 7-8 turns or so calculate distance from
+    # yourself to every other line.
+    # only those lines that are at like 50 or so distance will
+    # be accounted in collision detection.
+
+
 # def line_through_line(line1, line2):
     # # current implementation is very inefficient, may use lots of cpu
     # # it basically goes through every point and see if it intersects
@@ -1037,6 +1062,8 @@ def play_game(scr_size, scr_surface, font, game_mode):
         shrink_counter = shrink_rate
 
         game_running = True
+
+        crashed_players = []
         while game_running:
             all_events = pygame.event.get()
 
@@ -1046,8 +1073,6 @@ def play_game(scr_size, scr_surface, font, game_mode):
                         game_running = False
                     elif e.key == pygame.K_p:
                         pause_game(screen_surface, font1, screen_size)
-
-            crashed_players = []
 
             for p in all_players:
                 if not p in crashed_players:
@@ -1068,6 +1093,12 @@ def play_game(scr_size, scr_surface, font, game_mode):
 
                 uncrashed_player.score += 1
                 game_running = False
+
+            # just for debugging
+            #lines = []
+            #for p in game_map.players:
+            #    lines.extend(p.lines)
+            #print(len(lines))
 
             # draw everything here
             game_map.draw(screen_surface)
