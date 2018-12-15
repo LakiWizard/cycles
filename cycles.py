@@ -312,36 +312,6 @@ def dist_to_line_segment(x, y, line):
 
     return math.sqrt(result_squared)
 
-    # calculate shortest distance between point
-    # and line segment.
-
-    # basic idea for optimizing ai:
-    # every 7-8 turns or so calculate distance from
-    # yourself to every other line.
-    # only those lines that are at like 50 or so distance will
-    # be accounted in collision detection.
-
-
-# def line_through_line(line1, line2):
-    # # current implementation is very inefficient, may use lots of cpu
-    # # it basically goes through every point and see if it intersects
-    # # the target line.
-
-    # # first line is vertical
-    # if line1.x1 == line1.x2:
-        # x = line1.x1
-        # for y in range(min(line1.y1, line1.y2), max(line1.y1, line1.y2)+1):
-            # if point_on_line(x, y, line2):
-                # return True
-
-    # # first line is horizontal
-    # if line1.y1 == line1.y2:
-        # y = line1.y1
-        # for x in range(min(line1.x1, line1.x2), max(line1.x1, line1.x2)+1):
-            # if point_on_line(x, y, line2):
-                # return True
-
-    # return False
 
 def is_opposing_direction(d1, d2):
     # check if two directions are opposing
@@ -1021,9 +991,14 @@ def start_level(player_list):
         p5 = player_list[4]
         p6 = player_list[5]
 
+        p1.direction = "up"
+        p2.direction = "up"
+        p3.direction = "up"
+        p4.direction = "down"
+        p5.direction = "down"
+        p6.direction = "down"
         for p in player_list:
             p.lines.clear()
-            p.direction = "up"
 
         # top row
         p1.x = 100
@@ -1072,7 +1047,6 @@ def play_game(scr_size, scr_surface, font, game_mode):
     shrink_rate = fps_rate * 20
     shrink_size = 20
 
-    # for now we can assume there are only 2 players.
     # game_map arg can be None since that will be handled
     # in start_level.
     all_players = []
