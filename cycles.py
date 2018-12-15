@@ -568,6 +568,47 @@ class AIPlayer(Player):
     def __init__(self, x, y, color, game_map):
         super().__init__(x, y, color, game_map)
 
+        # player lines that will be used for collision detection
+        # to avoid iterating through every line on the map
+        # every game turn.
+        self.cached_lines = []
+        self.turns_to_update_cache = 10
+        self.cache_counter = 0
+
+    def get_closest_lines(self, distance):
+        # this also returns the line you are currently on
+        lines = []
+        for p in self.game_map.players:
+            lines.extend(p.lines)
+
+        nearby_lines = []
+        for l in lines:
+            dist = dist_to_line_segment(self.x, self.y, l)
+            if dist <= distance:
+                nearby_lines.append(l)
+
+        #print("updated cache: {} lines cached from a total of {}".format(len(nearby_lines), len(lines)))
+        return nearby_lines
+
+    def update(self):
+        # this should always be safely larger than the length of
+        # test line used for collision testing, so as not to collide
+        # with lines that were never added to the cache.
+        # turns_to_update_cache should also not be too large.
+        max_line_dist = 30
+
+        if self.cache_counter == self.turns_to_update_cache:
+            self.cached_lines = self.get_closest_lines(max_line_dist)
+            self.cache_counter = 0
+        else:
+            self.cache_counter += 1
+
+        #print("ai: line cache is", len(self.cached_lines))
+
+        # make sure to return status from the parent method
+        status = super().update()
+        return status
+
     def line_is_clear(self, linearg):
         # check if this line intersects any obstacles, lines or
         # reaches map edge.
@@ -581,16 +622,14 @@ class AIPlayer(Player):
             # print("line not in map bounds")
             return False
 
-        # use extend here since it has better performance
-        # with many elements.
-        all_lines = []
-        for p in self.game_map.players:
-            all_lines.extend(p.lines)
-
         # remove own line as it would always cause errors later
+        current_line = None
         if len(self.lines) > 0:
-            all_lines.remove(self.lines[0])
-        for line in all_lines:
+            current_line = self.lines[0]
+        for line in self.cached_lines:
+            if line is current_line:
+                continue
+
             if line_through_line(linearg, line):
                 # print("line goes through another line")
                 # print("linearg: {}, {}, {}, {}".format(linearg.x1, linearg.y1, linearg.x2, linearg.y2))
