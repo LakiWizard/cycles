@@ -1,6 +1,7 @@
 
 import pygame
 import random
+import math
 
 # for the about page button
 import webbrowser
@@ -287,7 +288,7 @@ def line_through_line(line1, line2):
         return False
 
 
-def point_dist(x1, y1, x2, y2):
+def point_dist_squared(x1, y1, x2, y2):
     # a weird way to calculate the distance between 2 points
     # (no sqrt being used)
     return (x1 - x2)**2 + (y1 - y2)**2
@@ -296,11 +297,20 @@ def point_dist(x1, y1, x2, y2):
 def dist_to_line_segment(x, y, line):
     # calculate distance between a point and a line (segment)
     # mathematical stuff
-    l = point_dist(line.x1, line.y1, line.x2, line.y2)
+    l = point_dist_squared(line.x1, line.y1, line.x2, line.y2)
     if (l == 0):
         # if the segment is just one point, then
         # calculate the point distance to it
-        return point_dist(x, y, line.x1, line.y1)
+        return math.sqrt(point_dist_squared(x, y, line.x1, line.y1))
+
+    t = ((x-line.x1) * (line.x2-line.x1) + (y-line.y1) * (line.y2-line.y1)) / l
+    t = max(0, min(1, t))
+
+    new_x = line.x1 + t * (line.x2-line.x1)
+    new_y = line.y1 + t * (line.y2-line.y1)
+    result_squared = point_dist_squared(x, y, new_x, new_y)
+
+    return math.sqrt(result_squared)
 
     # calculate shortest distance between point
     # and line segment.
@@ -389,7 +399,7 @@ def line_in_rect(line, rect):
     return False
 
 
-def line_collision_tests():
+def algo_tests():
     # some tests to check whether line_through_line and
     # line_in_rect work correctly.
 
@@ -410,6 +420,7 @@ def line_collision_tests():
     line1 = Line(5, 2, 15, 2)
     line2 = Line(9, 4, 9, 8)
     print("should be false:", line_through_line(line1, line2))
+    print()
 
 
     # line through rect tests
@@ -428,6 +439,18 @@ def line_collision_tests():
     rect1 = Obstacle(1, 1, 4-1, 4-1)
     line1 = Line(4, 4, 4, 5)
     print("should be true:", line_in_rect(line1, rect1))
+    print()
+
+    # dist to line segment tests
+    line1 = Line(0, 0, 0, 10)
+    x = 1
+    y = 5
+    print("should be 1:", dist_to_line_segment(x, y, line1))
+    line1 = Line(2, 5, 10, 5)
+    x = 8
+    y = 5
+    print("should be 0:", dist_to_line_segment(x, y, line1))
+    print()
 
 
 
@@ -1136,7 +1159,7 @@ def main():
 
     deinitialize()
 
-# line_collision_tests()
+# algo_tests()
 
 if __name__ == "__main__":
     main()
