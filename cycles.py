@@ -478,8 +478,7 @@ class Player():
         # check for all the lines
         all_lines = []
         for p in self.game_map.players:
-            for line in p.lines:
-                all_lines.append(line)
+            all_lines.extend(p.lines)
 
         all_lines.remove(self.lines[0])
         for line in all_lines:
@@ -687,7 +686,7 @@ class AIPlayer(Player):
 
 
 class TopBar():
-    def __init__(self, x, y, w, h, font_object, p1, p2):
+    def __init__(self, x, y, w, h, font_object, player_list, game_mode):
         self.x = x
         self.y = y
         self.w = w
@@ -700,14 +699,19 @@ class TopBar():
 
         self.rect = pygame.Rect(x, y, w, h)
 
+        self.game_mode = game_mode
+
         # the player objects, used for counting the scores
-        self.p1 = p1
-        self.p2 = p2
+        self.p1 = player_list[0]
+        self.p2 = player_list[1]
 
-        self.p1_color = p1.color
-        self.p2_color = p2.color
+        if self.game_mode in ["1pffa", "2pffa"]:
+            self.p3 = player_list[2]
+            self.p4 = player_list[3]
+            self.p5 = player_list[4]
+            self.p6 = player_list[5]
 
-    def draw(self, screen_surface, shrink_counter, fps_rate):
+    def draw(self, screen_surface, seconds_to_shrink):
         screen_surface.fill(self.black, self.rect)
 
         pos1 = (self.x, self.y+self.h)
@@ -726,23 +730,59 @@ class TopBar():
         # the players' colors and the actual numbers are white.
         # it is indeed needlesly complicated, but pygame seems
         # to have no easy way of drawing multi-colored text.
-        text2 = self.font.render("P1 score:", False, self.p1_color)
-        screen_surface.blit(text2, (text_x, self.y+text_height*2))
-        score1_x = self.font.size("P1 score:")[0] + text_x
-        score1 = self.font.render(str(self.p1.score), False, self.white)
-        screen_surface.blit(score1, (score1_x, self.y+text_height*2))
+        if self.game_mode in ["pvp", "pve"]:
+            text2 = self.font.render("P1 score:", False, self.p1.color)
+            screen_surface.blit(text2, (text_x, self.y+text_height*2))
+            score1_x = self.font.size("P1 score:")[0] + text_x
+            score1 = self.font.render(str(self.p1.score), False, self.white)
+            screen_surface.blit(score1, (score1_x, self.y+text_height*2))
 
-        text3 = self.font.render("P2 score:", False, self.p2_color)
-        screen_surface.blit(text3, (text_x, self.y+text_height*3))
-        score2_x = self.font.size("P2 score:")[0] + text_x
-        score2 = self.font.render(str(self.p2.score), False, self.white)
-        screen_surface.blit(score2, (score2_x, self.y+text_height*3))
+            text3 = self.font.render("P2 score:", False, self.p2.color)
+            screen_surface.blit(text3, (text_x, self.y+text_height*3))
+            score2_x = self.font.size("P2 score:")[0] + text_x
+            score2 = self.font.render(str(self.p2.score), False, self.white)
+            screen_surface.blit(score2, (score2_x, self.y+text_height*3))
+
+        elif self.game_mode in ["1pffa", "2pffa"]:
+            p1_text = self.font.render("P1:", False, self.p1.color)
+            p2_text = self.font.render("P2:", False, self.p2.color)
+            p3_text = self.font.render("P3:", False, self.p3.color)
+            p4_text = self.font.render("P4:", False, self.p4.color)
+            p5_text = self.font.render("P5:", False, self.p5.color)
+            p6_text = self.font.render("P6:", False, self.p6.color)
+
+            p1_score = self.font.render(str(self.p1.score), False, self.white)
+            p2_score = self.font.render(str(self.p2.score), False, self.white)
+            p3_score = self.font.render(str(self.p3.score), False, self.white)
+            p4_score = self.font.render(str(self.p4.score), False, self.white)
+            p5_score = self.font.render(str(self.p5.score), False, self.white)
+            p6_score = self.font.render(str(self.p6.score), False, self.white)
+
+            # p1
+            screen_surface.blit(p1_text, (text_x, self.y+40))
+            screen_surface.blit(p1_score, (text_x+40, self.y+40))
+
+            # p2
+            screen_surface.blit(p2_text, (text_x+100, self.y+40))
+            screen_surface.blit(p2_score, (text_x+100+40, self.y+40))
+
+            # and so on
+            screen_surface.blit(p3_text, (text_x+200, self.y+40))
+            screen_surface.blit(p3_score, (text_x+200+40, self.y+40))
+
+            screen_surface.blit(p4_text, (text_x, self.y+65))
+            screen_surface.blit(p4_score, (text_x+40, self.y+65))
+
+            screen_surface.blit(p5_text, (text_x+100, self.y+65))
+            screen_surface.blit(p5_score, (text_x+100+40, self.y+65))
+
+            screen_surface.blit(p6_text, (text_x+200, self.y+65))
+            screen_surface.blit(p6_score, (text_x+200+40, self.y+65))
 
         # show how many seconds to map reduction
         counter_x = self.x + self.w - 200
         counter_y = self.y + self.h - 30
-        seconds = int(shrink_counter / fps_rate)
-        counter_text = self.font.render("Reducing in: {}".format(seconds), False, self.white)
+        counter_text = self.font.render("Reducing in: {}".format(seconds_to_shrink), False, self.white)
         screen_surface.blit(counter_text, (counter_x, counter_y))
 
 
@@ -1086,7 +1126,7 @@ def play_game(scr_size, scr_surface, font, game_mode):
     clock = pygame.time.Clock()
 
     font1 = font
-    bar1 = TopBar(0, 0, 800, 100, font1, p1, p2)
+    bar1 = TopBar(0, 0, 800, 100, font1, all_players, game_mode)
 
     all_matches_finished = False
     while not all_matches_finished:
@@ -1138,7 +1178,10 @@ def play_game(scr_size, scr_surface, font, game_mode):
 
             # draw everything here
             game_map.draw(screen_surface)
-            bar1.draw(screen_surface, shrink_counter, fps_rate)
+
+            seconds_to_shrink = int(shrink_counter / fps_rate)
+            bar1.draw(screen_surface, seconds_to_shrink)
+
             pygame.display.flip()
 
             clock.tick(fps_rate)
