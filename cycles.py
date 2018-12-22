@@ -335,8 +335,20 @@ def is_in_rect(x, y, rx, ry, rw, rh):
     # check if a point is within a rect
     x1 = rx
     y1 = ry
-    x2 = x1 + rw
-    y2 = y1 + rh
+    # here 1 is substracted because just adding width
+    # and height would not give real x2 and y2.
+    # consider this:
+    # x1 = 0
+    # y1 = 0
+    # width = 1
+    # height = 1
+    # here x2 and y2 would be 1 and 1, even though
+    # we should have a 1x1 square.
+    # in practice this caused the player to collide with
+    # obstacles 1 pixel to the right and down of where they
+    # really were.
+    x2 = x1 + rw - 1
+    y2 = y1 + rh - 1
 
     x_ok = False
     y_ok = False
