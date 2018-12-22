@@ -1022,9 +1022,9 @@ def start_level(player_list):
         p2.lines.clear()
         p1.direction = "up"
         p2.direction = "up"
-        p1.x = 120
-        p1.y = 290
-        p2.x = 500
+        p1.x = 150
+        p1.y = 350
+        p2.x = 650
         p2.y = 350
 
         game_map = GameMap(0, 100, 800, 500)
@@ -1054,19 +1054,19 @@ def start_level(player_list):
 
         # top row
         p1.x = 100
-        p1.y = 200
-        p2.x = 350
-        p2.y = 200
+        p1.y = 250
+        p2.x = 400
+        p2.y = 250
         p3.x = 700
-        p3.y = 200
+        p3.y = 250
 
         # bottom row
         p4.x = 100
-        p4.y = 400
-        p5.x = 350
-        p5.y = 400
+        p4.y = 450
+        p5.x = 400
+        p5.y = 450
         p6.x = 700
-        p6.y = 400
+        p6.y = 450
 
         game_map = GameMap(0, 100, 800, 500)
         game_map.fill_with_obstacles(10)
