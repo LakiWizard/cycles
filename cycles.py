@@ -556,6 +556,9 @@ class AIPlayer(Player):
         self.turns_to_update_cache = 10
         self.cache_counter = 0
 
+        # this is re-randomized on every change of direction
+        self.test_line_length = random.randint(11, 16)
+
     def get_closest_lines(self, distance):
         # this also returns the line you are currently on
         lines = []
@@ -669,8 +672,7 @@ class AIPlayer(Player):
     def handle_input(self):
         possible_directions = self.get_possible_directions()
 
-        test_line_length = random.randint(11, 16)
-        test_line = self.get_line_in_direction(self.direction, test_line_length)
+        test_line = self.get_line_in_direction(self.direction, self.test_line_length)
         if self.line_is_clear(test_line):
             return None
 
@@ -690,6 +692,9 @@ class AIPlayer(Player):
         # start new line when changing direction
         self.start_new_line()
         #print("ai: obstacles in the way, changing direction to:", self.direction)
+
+        # re-randomize test line length
+        self.test_line_length = random.randint(11, 16)
 
         # you cant go in reverse
         #if is_opposing_direction(new_direction, self.direction):
