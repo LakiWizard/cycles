@@ -156,8 +156,18 @@ class Button():
         # test if a point is inside this
         return self.rect.collidepoint(x, y)
 
-    def draw(self):
-        text_surface = self.font.render(self.text, False, self.color)
+    def draw(self, highlighted=False):
+        # highlighted inverts primary and secondary color
+        # mostly meant for mouse-over
+
+        if not highlighted:
+            primary_color = self.color
+            second_color = self.bkg_color
+        else:
+            primary_color = self.bkg_color
+            second_color = self.color
+
+        text_surface = self.font.render(self.text, False, primary_color)
 
         # center-align the text
         text_w = self.font.size(self.text)[0]
@@ -169,11 +179,50 @@ class Button():
         y_margin = (box_h - text_h) // 2
 
         # first fill with background, then text and boundary
-        pygame.draw.rect(self.parent_surface, self.bkg_color, self.rect, 0)
+        pygame.draw.rect(self.parent_surface, second_color, self.rect, 0)
 
         self.parent_surface.blit(text_surface, (self.x+x_margin, self.y+y_margin))
 
+        # boundary always uses self.color
         pygame.draw.rect(self.parent_surface, self.color, self.rect, 1)
+
+
+
+class ButtonHandler():
+    def __init__(self, button_list, clock_interval):
+        self.button_list = button_list
+        self.clock = pygame.time.Clock()
+        self.clock_interval = clock_interval
+
+        self.clicked_on_button = None
+        self.moused_on_button = None
+
+    def update_events(self):
+        # update clicked_on_button and moused_on_button
+        events = pygame.event.get()
+        for e in events:
+            if e.type == pygame.MOUSEMOTION:
+                pos = pygame.mouse.get_pos()
+
+                self.moused_on_button = None
+                for button in self.button_list:
+                    if button.is_inside(pos[0], pos[1]):
+                        self.moused_on_button = button
+
+            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                self.clicked_on_button = self.moused_on_button
+
+    def draw_buttons(self):
+        # this doesnt do display.flip
+
+        for button in self.button_list:
+            if button is self.moused_on_button:
+                button.draw(True)
+            else:
+                button.draw(False)
+
+    def clock_tick(self):
+        self.clock.tick(self.clock_interval)
 
 
 
@@ -817,24 +866,20 @@ def main_menu(scr_size, scr_surface, font):
     buttons = [button1, button2, button3]
 
     scr_surface.fill(pygame.Color(0, 0, 0))
-    for button in buttons:
-        button.draw()
-    pygame.display.flip()
 
-    clock = pygame.time.Clock()
+    # 30 fps is enough when just rendering some buttons
+    button_handler = ButtonHandler(buttons, 30)
+    while True:
+        button_handler.draw_buttons()
+        pygame.display.flip()
 
-    button_clicked = None
-    while button_clicked is None:
-        events = pygame.event.get()
-        for e in events:
-            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                pos = pygame.mouse.get_pos()
+        button_handler.update_events()
 
-                for button in buttons:
-                    if button.is_inside(pos[0], pos[1]):
-                        button_clicked = button
+        button_clicked = button_handler.clicked_on_button
+        if not button_clicked is None:
+            break
 
-        clock.tick(10)
+        button_handler.clock_tick()
 
     if button_clicked is button1:
         return "start"
@@ -859,24 +904,19 @@ def game_types_menu(scr_size, scr_surface, font):
     buttons = [button1, button2, button3, button4]
 
     scr_surface.fill(pygame.Color(0, 0, 0))
-    for button in buttons:
-        button.draw()
-    pygame.display.flip()
 
-    clock = pygame.time.Clock()
+    button_handler = ButtonHandler(buttons, 30)
+    while True:
+        button_handler.draw_buttons()
+        pygame.display.flip()
 
-    button_clicked = None
-    while button_clicked is None:
-        events = pygame.event.get()
-        for e in events:
-            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                pos = pygame.mouse.get_pos()
+        button_handler.update_events()
 
-                for button in buttons:
-                    if button.is_inside(pos[0], pos[1]):
-                        button_clicked = button
+        button_clicked = button_handler.clicked_on_button
+        if not button_clicked is None:
+            break
 
-        clock.tick(10)
+        button_handler.clock_tick()
 
     if button_clicked is button1:
         return "pvp"
@@ -940,23 +980,20 @@ def show_about_screen(scr_size, scr_surface):
     back_button.action = lambda: None
     buttons = [page_button, back_button]
 
-    pygame.display.flip()
+    #pygame.display.flip()
 
+    button_handler = ButtonHandler(buttons, 30)
+    while True:
+        button_handler.draw_buttons()
+        pygame.display.flip()
 
-    clock = pygame.time.Clock()
+        button_handler.update_events()
 
-    button_clicked = None
-    while button_clicked is None:
-        events = pygame.event.get()
-        for e in events:
-            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                pos = pygame.mouse.get_pos()
+        button_clicked = button_handler.clicked_on_button
+        if not button_clicked is None:
+            break
 
-                for button in buttons:
-                    if button.is_inside(pos[0], pos[1]):
-                        button_clicked = button
-
-        clock.tick(10)
+        button_handler.clock_tick()
 
     button_clicked.action()
 
