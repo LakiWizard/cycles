@@ -1,14 +1,15 @@
 # cycles
 
-Cycles is a game for two players, written in Python and using the Pygame library. The font used is DejaVu Sans Mono.
+Cycles is a game where one or two human players compete with each other or multiple AI to be the last standing in a shrinking arena. There are two 1v1 modes and two 6p free-for-all modes of play.
 
-Two players move around the open area, you score by making the other player crash. Some obstacles are randomly placed
-around every round.
+It is written in Python and uses the Pygame library. The font used is DejaVu Sans Mono.
+
+Players move around the open area. You crash if you hit a trail, an obstacle or the arena edges. You score by surviving the longest time. Some obstacles are randomly placed around every round.
 
 Every 20 seconds, the open area shrinks. This makes it harder to manuveur in a smaller and smaller space.
 
 Controls:
-- WASD and arrows for movement
+- WASD (player 1) and arrows (player 2) for movement
 - ESC will give you a prompt to exit game or start new round
 - P is pause/unpause
 
