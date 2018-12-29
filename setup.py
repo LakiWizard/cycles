@@ -18,7 +18,7 @@ options = {
 }
 
 setup(name="Cycles",
-      version="1.1",
+      version="1.2",
       executables=[Executable("cycles.py", base=base)],
       options=options
       )
