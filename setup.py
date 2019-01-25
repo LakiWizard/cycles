@@ -13,7 +13,8 @@ to_include = ["DejaVuSansMono.ttf", "README.md"]
 
 options = {
     "build_exe": {
-        "include_files": to_include
+        "include_files": to_include,
+        "include_msvcr": True
         }
 }
 
